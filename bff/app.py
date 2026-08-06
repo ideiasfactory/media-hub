@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
+from backend.jobs import OUTPUT_ROOT
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from fastapi.staticfiles import StaticFiles
+from frontend import STATIC_DIR
 
 from app import __version__
-from backend.jobs import OUTPUT_ROOT
 from bff.api.v1 import router as api_v1_router
 from bff.auth import api_key_required
 from bff.web import router as web_router
-from frontend import STATIC_DIR
 
 load_dotenv()
 
@@ -50,9 +50,7 @@ def create_app() -> FastAPI:
             routes=application.routes,
         )
         if api_key_required():
-            schema.setdefault("components", {}).setdefault("securitySchemes", {})[
-                "ApiKeyAuth"
-            ] = {
+            schema.setdefault("components", {}).setdefault("securitySchemes", {})["ApiKeyAuth"] = {
                 "type": "apiKey",
                 "in": "header",
                 "name": "X-API-Key",

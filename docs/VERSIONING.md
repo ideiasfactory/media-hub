@@ -24,7 +24,15 @@ documentadas explicitamente no [CHANGELOG.md](../CHANGELOG.md).
 
 ## Releases
 
+Checklist obrigatório ao fechar uma versão ([ADR-021](DECISIONS.md#adr-021--checklist-obrigatório-ao-fechar-uma-versão)):
+
 1. Atualizar `app/__init__.py` (`__version__`).
-2. Atualizar `CHANGELOG.md` (técnico) e `app/releases.py` (usuário).
-3. Atualizar badge de versão no README.
-4. Tag Git `vX.Y.Z` após merge em `main`.
+2. Atualizar `CHANGELOG.md` (técnico) — mover itens de `[Unreleased]` para
+   `[X.Y.Z]` e ajustar links de comparação.
+3. Atualizar `bff/releases.py` (`USER_RELEASES`) com notas amigáveis na UI.
+4. Atualizar badge de versão no README.
+5. Atualizar testes que fixam a versão na página `/changelog`, se houver.
+6. Rodar `pytest` e `python -m compileall app backend bff frontend`.
+7. Abrir PR para `main`; após merge, criar tag Git `vX.Y.Z`.
+
+Release notes em dois níveis: [ADR-019](DECISIONS.md#adr-019--release-notes-em-dois-níveis).

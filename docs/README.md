@@ -8,7 +8,7 @@
 | [EPICS.md](EPICS.md) | Catálogo detalhado EPIC-001 … EPIC-034 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura atual (v0.1) e alvo da plataforma |
 | [DECISIONS.md](DECISIONS.md) | Architecture Decision Records (ADRs) |
-| [VERSIONING.md](VERSIONING.md) | SemVer do produto e contrato `/api/vN` |
+| [VERSIONING.md](VERSIONING.md) | SemVer do produto, contrato `/api/vN` e checklist de release (ADR-021) |
 
 ## Como manter
 
@@ -19,4 +19,6 @@
 4. Não expandir escopo de implementação sem épico autorizado e aprovação humana.
 
 Guia operacional de instalação e execução: [../README.md](../README.md).  
+Isenção de responsabilidade (conteúdo / direitos autorais): [../DISCLAIMER.md](../DISCLAIMER.md).  
+Política de privacidade (dados na instância local): [../PRIVACY.md](../PRIVACY.md).  
 Regras para agentes: [../AGENTS.md](../AGENTS.md).

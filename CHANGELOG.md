@@ -7,8 +7,32 @@ e este projeto adota [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
 Notas amigáveis para usuário final: interface em `/changelog`.
 Política de contrato da API: [ADR-017](docs/DECISIONS.md#adr-017--semver-e-versionamento-do-contrato-da-api).
+Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checklist-obrigatório-ao-fechar-uma-versão).
 
 ## [Unreleased]
+
+## [0.1.2] - 2026-08-06
+
+### Added
+
+- Pipeline CI no GitHub Actions (lint Ruff, Bandit, `pip-audit`, Dependency Review
+  e testes em Python 3.11/3.12).
+- `requirements-dev.txt`, `pyproject.toml` (Ruff/Bandit) e Dependabot semanal.
+- `DISCLAIMER.md` (direitos autorais + tolerância zero a exploração infantil e
+  outros usos ilegais) e `PRIVACY.md`.
+- [ADR-021](docs/DECISIONS.md#adr-021--checklist-obrigatório-ao-fechar-uma-versão):
+  checklist obrigatório de release notes ao fechar versão.
+
+### Changed
+
+- Avisos legais na UI e no Código de Conduta alinhados ao disclaimer.
+- Compatibilidade de data/hora com `timezone.utc` (evita `ImportError` em
+  runtimes sem `datetime.UTC`).
+
+### Security
+
+- Dependências atualizadas (`fastapi`, `requests`, `pytest`; piso
+  `starlette>=1.3.1`) para eliminar CVEs reportados pelo `pip-audit`.
 
 ## [0.1.1] - 2026-08-06
 
@@ -44,6 +68,7 @@ Política de contrato da API: [ADR-017](docs/DECISIONS.md#adr-017--semver-e-vers
 - Artefatos `audio.mp3`, `transcript.txt`, `transcript.srt`, `metadata.json`.
 - Documentação inicial de roadmap, épicos, arquitetura e ADRs.
 
-[Unreleased]: https://github.com/ideiasfactory/media-hub/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/ideiasfactory/media-hub/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/ideiasfactory/media-hub/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ideiasfactory/media-hub/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ideiasfactory/media-hub/releases/tag/v0.1.0

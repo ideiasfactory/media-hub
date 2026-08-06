@@ -4,9 +4,7 @@ from collections.abc import Iterable
 from pathlib import Path
 from urllib.parse import urlparse
 
-ALLOWED_ARTIFACTS = frozenset(
-    {"audio.mp3", "transcript.txt", "transcript.srt", "metadata.json"}
-)
+ALLOWED_ARTIFACTS = frozenset({"audio.mp3", "transcript.txt", "transcript.srt", "metadata.json"})
 YOUTUBE_HOSTS = frozenset(
     {
         "youtube.com",

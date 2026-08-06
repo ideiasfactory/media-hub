@@ -1,6 +1,7 @@
 # Media Hub
 
-[![Version](https://img.shields.io/badge/version-0.1.1-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](CHANGELOG.md)
+[![CI](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-lightgrey.svg)](LICENSE)
 [![API](https://img.shields.io/badge/API-/api/v1-orange.svg)](http://localhost:8010/docs)
@@ -112,6 +113,18 @@ pytest
 python -m compileall app backend bff frontend
 ```
 
+Para lint e segurança (mesmo conjunto do CI):
+
+```bash
+python -m pip install -r requirements-dev.txt
+ruff check app backend bff frontend tests
+ruff format --check app backend bff frontend tests
+bandit -r app backend bff -ll -c pyproject.toml
+pip-audit
+```
+
+O pipeline GitHub Actions (`.github/workflows/ci.yml`) executa lint, Bandit,
+`pip-audit`, Dependency Review (em PRs) e testes em Python 3.11/3.12.
 ## Arquivos gerados
 
 Cada job usa `output/{job_id}/` e pode produzir:
@@ -161,6 +174,12 @@ Distribuído sob a [PolyForm Noncommercial License 1.0.0](LICENSE).
 ## Uso responsável
 
 Utilize somente conteúdo próprio, autorizado ou cujo processamento seja permitido
-pela legislação e pelos termos aplicáveis. O projeto não contorna DRM, autenticação,
-restrições territoriais ou outros controles de acesso e não usa cookies ou credenciais
-de plataformas de mídia.
+pela legislação e pelos termos aplicáveis. É proibido qualquer uso ilegal —
+incluindo exploração ou abuso sexual de crianças e adolescentes e demais crimes
+listados no disclaimer. O projeto não contorna DRM, autenticação, restrições
+territoriais ou outros controles de acesso e não usa cookies ou credenciais de
+plataformas de mídia.
+
+Leia a [Isenção de Responsabilidade](DISCLAIMER.md) (direitos autorais, usos
+ilegais proibidos e limitação de responsabilidade) e a
+[Política de Privacidade](PRIVACY.md) (como tratamos dados na instância local).

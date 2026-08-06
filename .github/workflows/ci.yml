@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install lint tools
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ruff==0.12.7
+
+      - name: Ruff check
+        run: ruff check app backend bff frontend tests
+
+      - name: Ruff format (check)
+        run: ruff format --check app backend bff frontend tests
+
+  security:
+    name: Security (bandit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install bandit
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install bandit==1.8.6
+
+      - name: Bandit
+        run: bandit -r app backend bff -ll -c pyproject.toml
+
+  supply-chain:
+    name: Supply chain (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install runtime dependencies
+        run: |
+          python -m pip install --upgrade pip "setuptools>=83" wheel
+          python -m pip install -r requirements.txt
+          python -m pip install pip-audit==2.9.0
+
+      - name: Audit installed runtime tree
+        run: pip-audit --progress-spinner off
+
+      - name: Install and audit dev tools
+        run: |
+          python -m pip install -r requirements-dev.txt
+          pip-audit --progress-spinner off
+
+  dependency-review:
+    name: Supply chain (dependency review)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
+
+  test:
+    name: Tests (pytest + compileall)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+
+      - name: Compile
+        run: python -m compileall app backend bff frontend
+
+      - name: Pytest
+        run: pytest

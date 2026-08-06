@@ -9,10 +9,30 @@ from app import __version__
 # Friendly highlights shown in the UI. Keep language simple and user-oriented.
 USER_RELEASES: list[dict[str, Any]] = [
     {
+        "version": "0.1.2",
+        "date": "2026-08-06",
+        "title": "Mais segurança e transparência",
+        "summary": (
+            "O Media Hub ganhou pipeline de qualidade no GitHub, auditoria de "
+            "dependências e documentos claros de privacidade e uso responsável."
+        ),
+        "highlights": [
+            "Testes, lint e checagens de segurança automáticos no CI",
+            "Dependências revisadas contra vulnerabilidades conhecidas",
+            "Política de privacidade explicando o que fica na sua máquina",
+            "Isenção de responsabilidade com regras explícitas de uso ilegal",
+            "Tolerância zero a exploração ou abuso de crianças e adolescentes",
+        ],
+    },
+    {
         "version": "0.1.1",
         "date": "2026-08-06",
         "title": "API pronta para integração",
-        "summary": "O Media Hub ganhou proteção por API Key, documentação Swagger, versionamento, novidades na interface e organização em camadas no monorepo.",
+        "summary": (
+            "O Media Hub ganhou proteção por API Key, documentação Swagger, "
+            "versionamento, novidades na interface e organização em camadas "
+            "no monorepo."
+        ),
         "highlights": [
             "Documentação interativa da API em /docs",
             "Endpoints versionados em /api/v1",
@@ -26,7 +46,9 @@ USER_RELEASES: list[dict[str, Any]] = [
         "version": "0.1.0",
         "date": "2026-08-06",
         "title": "Primeiro MVP do YouTube",
-        "summary": "Baixe o áudio de um vídeo público, transcreva localmente e baixe MP3, TXT, SRT e JSON.",
+        "summary": (
+            "Baixe o áudio de um vídeo público, transcreva localmente e baixe MP3, TXT, SRT e JSON."
+        ),
         "highlights": [
             "Interface simples na porta 8010",
             "Transcrição com Whisper local",
