@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
-from fastapi.responses import FileResponse
-
 from backend.jobs import OUTPUT_ROOT, job_store, process_job
 from backend.models import JobRequest, JobResponse
 from backend.utils import resolve_artifact
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from fastapi.responses import FileResponse
+
 from bff.auth import require_api_key
 
 router = APIRouter(

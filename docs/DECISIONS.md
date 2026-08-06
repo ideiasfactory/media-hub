@@ -34,6 +34,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Accepted |
 | [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Accepted |
 | [ADR-020](#adr-020--monorepo-modular-frontend--bff--backend) | Monorepo modular frontend / BFF / backend | Accepted |
+| [ADR-021](#adr-021--checklist-obrigatório-ao-fechar-uma-versão) | Checklist obrigatório ao fechar uma versão | Accepted |
 
 ---
 
@@ -568,3 +569,53 @@ Regras de dependência:
 - Entrypoint e porta 8010 inalterados (compatível com ADR-001 / ADR-005).
 - Extrair processo/serviço real no futuro fica mais barato.
 - Não introduz Docker, filas ou frontend SPA nesta etapa.
+
+---
+
+## ADR-021 — Checklist obrigatório ao fechar uma versão
+
+**Status:** Accepted  
+**Data:** 2026-08-06  
+**Épico:** EPIC-030 (processo)  
+**Relacionado:** [ADR-017](#adr-017--semver-e-versionamento-do-contrato-da-api),
+[ADR-019](#adr-019--release-notes-em-dois-níveis)
+
+### Contexto
+
+ADR-019 define *o quê* publicar (notas de usuário + changelog técnico). Na
+prática, releases podem fechar com `__version__` atualizado e um dos artefatos
+esquecido (UI desatualizada, links do Keep a Changelog quebrados, badge do
+README defasado). Isso gera inconsistência entre `/health`, `/changelog` e o
+repositório.
+
+### Decisão
+
+**Toda** versão fechada (tag SemVer / PR de release) deve completar este
+checklist antes do merge em `main`:
+
+1. **Versão canônica:** `app/__init__.py` → `__version__ = "X.Y.Z"`.
+2. **Changelog técnico:** em `CHANGELOG.md`, mover o conteúdo de `[Unreleased]`
+   para uma seção `## [X.Y.Z] - YYYY-MM-DD` (Added / Changed / Fixed /
+   Security conforme Keep a Changelog) e atualizar os links de comparação no
+   rodapé (`[Unreleased]`, `[X.Y.Z]`, …).
+3. **Release notes de usuário:** em `bff/releases.py`, inserir um novo item no
+   topo de `USER_RELEASES` com `version`, `date`, `title`, `summary` e
+   `highlights` em linguagem simples (sem jargão de ADR/épico).
+4. **Superfície pública:** badge de versão no `README.md`; testes que assertam
+   a versão na página `/changelog` (se existirem).
+5. **Documentação de processo:** se o fluxo de release mudar, atualizar
+   `docs/VERSIONING.md` na mesma PR.
+6. **Verificação:** `pytest` e `python -m compileall app backend bff frontend`
+   (e o CI, quando aplicável).
+7. **Após merge:** tag Git `vX.Y.Z` alinhada ao `__version__`.
+
+Não se considera “versão fechada” apenas com bump de número sem os dois níveis
+de release notes (ADR-019).
+
+### Consequências
+
+- PRs de release ficam previsíveis e revisáveis.
+- `/changelog`, `CHANGELOG.md` e `__version__` permanecem sincronizados.
+- Agentes e contribuidores têm um procedimento explícito (também espelhado em
+  `docs/VERSIONING.md`).
+- Custo pequeno e constante por release; evita retrabalho pós-tag.

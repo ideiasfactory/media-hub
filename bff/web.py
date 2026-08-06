@@ -5,11 +5,11 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
+from frontend import TEMPLATES_DIR
 
 from app import __version__
 from bff.auth import API_KEY_COOKIE, api_key_required, get_configured_api_key
-from bff.releases import list_user_releases, latest_user_release
-from frontend import TEMPLATES_DIR
+from bff.releases import latest_user_release, list_user_releases
 
 router = APIRouter(include_in_schema=False)
 templates = Jinja2Templates(directory=TEMPLATES_DIR)

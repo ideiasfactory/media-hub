@@ -1,0 +1,36 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - security
+    groups:
+      runtime:
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "ruff"
+          - "bandit"
+          - "pip-audit"
+      ci-tools:
+        patterns:
+          - "ruff"
+          - "bandit"
+          - "pip-audit"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - ci
+    groups:
+      actions:
+        patterns:
+          - "*"

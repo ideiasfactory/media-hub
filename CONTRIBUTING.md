@@ -36,6 +36,16 @@ pytest
 python -m compileall app backend bff frontend
 ```
 
+Recomendado antes do PR (alinhado ao CI):
+
+```bash
+python -m pip install -r requirements-dev.txt
+ruff check app backend bff frontend tests
+ruff format --check app backend bff frontend tests
+bandit -r app backend bff -ll -c pyproject.toml
+pip-audit
+```
+
 Quando houver FFmpeg e rede, faça smoke test com vídeo público curto autorizado.
 
 ## Padrões

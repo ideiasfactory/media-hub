@@ -8,6 +8,8 @@
 
 - [ ] `pytest`
 - [ ] `python -m compileall app backend bff frontend`
+- [ ] `ruff check` / `ruff format --check` (ou aguardar CI)
+- [ ] CI verde (lint, bandit, pip-audit, testes)
 - [ ] Smoke manual em `http://localhost:8010` (se aplicável)
 
 ## Notes
