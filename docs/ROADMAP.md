@@ -39,7 +39,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | Release | Foco | Épicos principais |
 |---------|------|-------------------|
 | **v0.1** | Foundation + YouTube Web MVP | EPIC-001 |
-| **v0.1.x** | Governança, DX e contrato | EPIC-026–EPIC-033 |
+| **v0.1.x** | Governança, DX, contrato e monorepo modular | EPIC-026–EPIC-034 |
 | **v0.2** | YouTube Evolution + Registry | EPIC-002, EPIC-003 |
 | **v0.3** | Storage + adapters sociais + CLI | EPIC-004–EPIC-006, EPIC-028 |
 | **v0.4** | Mais adapters + multi-transcriber | EPIC-007–EPIC-014 |
@@ -86,14 +86,15 @@ prioridade alta de higiene de produto.
 | EPIC-023 | Autenticação completa (usuários / OAuth) | Planejado |
 | EPIC-024 | Billing | Planejado |
 | EPIC-025 | Media Hub Platform 1.0 | Planejado |
-| EPIC-026 | API Key via `.env` | Planejado |
-| EPIC-027 | OpenAPI / Swagger | Planejado |
+| EPIC-026 | API Key via `.env` | Concluído |
+| EPIC-027 | OpenAPI / Swagger | Concluído |
 | EPIC-028 | CLI Media Hub | Planejado |
-| EPIC-029 | Versionamento SemVer e contrato da API | Planejado |
-| EPIC-030 | Release notes (usuário + técnico) | Planejado |
-| EPIC-031 | Licenciamento (PolyForm Noncommercial) | Planejado |
-| EPIC-032 | Documentos e regras de contribuição | Planejado |
-| EPIC-033 | README aprimorado e widgets GitHub | Planejado |
+| EPIC-029 | Versionamento SemVer e contrato da API | Concluído |
+| EPIC-030 | Release notes (usuário + técnico) | Concluído |
+| EPIC-031 | Licenciamento (PolyForm Noncommercial) | Concluído |
+| EPIC-032 | Documentos e regras de contribuição | Concluído |
+| EPIC-033 | README aprimorado e widgets GitHub | Concluído |
+| EPIC-034 | Monorepo modular (frontend / BFF / backend) | Concluído |
 
 Detalhamento de cada épico: [EPICS.md](EPICS.md).
 
@@ -106,18 +107,21 @@ Detalhamento de cada épico: [EPICS.md](EPICS.md).
 Aplicação funcional local: URL pública do YouTube → áudio → Whisper local →
 TXT / SRT / JSON + UI e API na porta 8010. **Concluído.**
 
-### v0.1.x — Governança e DX (EPIC-026–033)
+### v0.1.x — Governança e DX (EPIC-026–034) ✅
 
-Higiene de produto em paralelo ao MVP:
+Higiene de produto (release **0.1.1**):
 
 - licença source-available sem uso comercial (PolyForm Noncommercial);
 - CONTRIBUTING / CODE_OF_CONDUCT / PR template;
 - README com badges/widgets GitHub;
-- SemVer do app + versionamento do contrato da API em breaking changes;
-- release notes amigáveis na UI e notas técnicas no repositório;
+- SemVer do app + versionamento do contrato da API (`/api/v1`);
+- release notes amigáveis na UI (`/changelog`) e notas técnicas no repositório;
 - proteção da API por API Key em `.env`;
-- exposição do Swagger/OpenAPI;
-- CLI para uso como tool (pode ser fatiado para v0.3 se necessário).
+- exposição do Swagger/OpenAPI (`/docs`);
+- monorepo modular com camadas `frontend/`, `bff/` e `backend/` (EPIC-034),
+  mantendo um único processo Uvicorn.
+
+CLI (EPIC-028) permanece planejado para sprint seguinte.
 
 ### v0.2 — YouTube Evolution + Registry (EPIC-002, EPIC-003)
 

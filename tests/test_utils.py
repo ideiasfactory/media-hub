@@ -1,8 +1,8 @@
-from app.utils import (
+from backend.utils import (
+    format_srt_timestamp,
     generate_srt,
     is_allowed_artifact,
     is_valid_youtube_url,
-    format_srt_timestamp,
 )
 
 

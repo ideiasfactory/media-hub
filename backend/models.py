@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, Field, field_validator
 
-from app.utils import is_valid_youtube_url
+from backend.utils import is_valid_youtube_url
 
 
 class JobStatus(str, Enum):

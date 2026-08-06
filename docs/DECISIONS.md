@@ -28,11 +28,12 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-012](#adr-012--metadata-store-jsonl--postgresql) | Metadata Store JSONL → PostgreSQL | Proposed |
 | [ADR-013](#adr-013--sem-contorno-de-drm-auth-ou-geo) | Sem contorno de DRM, auth ou geo | Accepted |
 | [ADR-014](#adr-014--extrair-abstrações-somente-com-uso-imediato) | Extrair abstrações somente com uso imediato | Accepted |
-| [ADR-015](#adr-015--api-key-via-variável-de-ambiente) | API Key via variável de ambiente | Proposed |
-| [ADR-016](#adr-016--openapi--swagger-nativos-do-fastapi) | OpenAPI / Swagger nativos do FastAPI | Proposed |
-| [ADR-017](#adr-017--semver-e-versionamento-do-contrato-da-api) | SemVer e versionamento do contrato da API | Proposed |
-| [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Proposed |
-| [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Proposed |
+| [ADR-015](#adr-015--api-key-via-variável-de-ambiente) | API Key via variável de ambiente | Accepted |
+| [ADR-016](#adr-016--openapi--swagger-nativos-do-fastapi) | OpenAPI / Swagger nativos do FastAPI | Accepted |
+| [ADR-017](#adr-017--semver-e-versionamento-do-contrato-da-api) | SemVer e versionamento do contrato da API | Accepted |
+| [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Accepted |
+| [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Accepted |
+| [ADR-020](#adr-020--monorepo-modular-frontend--bff--backend) | Monorepo modular frontend / BFF / backend | Accepted |
 
 ---
 
@@ -385,7 +386,7 @@ exigir a abstração como entrega.
 
 ## ADR-015 — API Key via variável de ambiente
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-026  
 **Evolução:** EPIC-023
@@ -412,7 +413,7 @@ usuários/OAuth e múltiplas keys fica para EPIC-023.
 
 ## ADR-016 — OpenAPI / Swagger nativos do FastAPI
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-027
 
@@ -437,7 +438,7 @@ alinhados ao SemVer do produto.
 
 ## ADR-017 — SemVer e versionamento do contrato da API
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-029
 
@@ -464,7 +465,7 @@ sem sinal claro.
 
 ## ADR-018 — Licença PolyForm Noncommercial 1.0.0
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-031
 
@@ -504,7 +505,7 @@ Alternativas consideradas e rejeitadas para este objetivo:
 
 ## ADR-019 — Release notes em dois níveis
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-030
 
@@ -528,3 +529,42 @@ Ambos ligados à mesma tag SemVer.
 - Processo de release inclui redigir os dois textos.
 - UI não expõe detalhes internos desnecessários.
 - Time preserva histórico técnico auditável no Git.
+
+---
+
+## ADR-020 — Monorepo modular frontend / BFF / backend
+
+**Status:** Accepted  
+**Data:** 2026-08-06  
+**Épico:** EPIC-034
+
+### Contexto
+
+O MVP nasceu com todos os módulos em `app/`. Isso acelerou a entrega, mas misturou
+apresentação, borda HTTP e domínio no mesmo pacote, dificultando evolução (CLI,
+adapters, workers) sem reorganização posterior.
+
+### Decisão
+
+Manter **um único processo** e um monorepo, separando pastas por camada:
+
+| Camada | Pacote | Papel |
+|--------|--------|-------|
+| Frontend | `frontend/` | Templates e estáticos |
+| BFF | `bff/` | Páginas, `/api/v1`, auth, OpenAPI, factory |
+| Backend | `backend/` | Jobs, media, transcription, models, utils |
+| App | `app/` | Composition root (`uvicorn app.main:app`) |
+
+Regras de dependência:
+
+- `frontend` não importa `backend` nem `bff`;
+- `backend` não importa `bff` nem `frontend`;
+- `bff` orquestra HTTP e chama `backend`;
+- `app` apenas instancia o BFF.
+
+### Consequências
+
+- Clareza de fronteiras sem custo operacional de microserviços.
+- Entrypoint e porta 8010 inalterados (compatível com ADR-001 / ADR-005).
+- Extrair processo/serviço real no futuro fica mais barato.
+- Não introduz Docker, filas ou frontend SPA nesta etapa.

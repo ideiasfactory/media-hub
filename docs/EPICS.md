@@ -421,7 +421,7 @@ observabilidade e integração consolidada com Video Lab.
 
 ## EPIC-026 — API Key via `.env`
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001  
 **ADRs:** 015
@@ -451,7 +451,7 @@ variável de ambiente, sem usuários nem OAuth.
 
 ## EPIC-027 — OpenAPI / Swagger
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001  
 **ADRs:** 016
@@ -504,7 +504,7 @@ mesma API/serviço.
 
 ## EPIC-029 — Versionamento SemVer e contrato da API
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001  
 **ADRs:** 017
@@ -533,7 +533,7 @@ breaking change.
 
 ## EPIC-030 — Release notes (usuário + técnico)
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-029  
 **ADRs:** 019
@@ -565,7 +565,7 @@ Publicar notas de versão em dois níveis: usuário final e time técnico.
 
 ## EPIC-031 — Licenciamento (PolyForm Noncommercial)
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **ADRs:** 018
 
@@ -599,7 +599,7 @@ comercial).
 
 ## EPIC-032 — Documentos e regras de contribuição
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-031 (recomendado)
 
@@ -624,7 +624,7 @@ Definir como a comunidade e o time contribuem com qualidade e segurança.
 
 ## EPIC-033 — README aprimorado e widgets GitHub
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001; idealmente EPIC-029 e EPIC-031
 
@@ -648,3 +648,35 @@ visuais do GitHub.
 - README autoexplicativo para clonar → rodar em poucos minutos
 - badges renderizam no GitHub
 - não duplica o roadmap; aponta para `docs/`
+
+---
+
+## EPIC-034 — Monorepo modular (frontend / BFF / backend)
+
+**Status:** Concluído  
+**Release:** v0.1.x (0.1.1)  
+**Depende de:** EPIC-001  
+**ADRs:** 020
+
+### Objetivo
+
+Reorganizar o monólito monolítico de pastas em um **monorepo modular**, separando
+as camadas frontend, BFF e backend sem introduzir múltiplos processos, Docker ou
+deploy distribuído.
+
+### Inclui
+
+```
+frontend/   # templates + static
+bff/        # páginas HTML, /api/v1, auth, factory FastAPI
+backend/    # jobs, media, transcription, models, utils
+app/        # composition root (uvicorn app.main:app)
+```
+
+### Critérios de aceite
+
+- `uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload` continua válido
+- UI, API, health e Swagger funcionam como antes
+- `pytest` e `python -m compileall app backend bff frontend` passam
+- documentação de arquitetura atualizada
+- frontend não importa backend; BFF é a única ponte HTTP → domínio

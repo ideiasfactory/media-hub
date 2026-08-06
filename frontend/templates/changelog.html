@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Novidades do Media Hub para usuários finais.">
+    <title>Novidades · Media Hub</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='/styles.css') }}">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div class="brand-mark" aria-hidden="true">▶</div>
+        <div>
+          <p class="eyebrow">Release notes · v{{ app_version }}</p>
+          <h1>Novidades</h1>
+          <p class="lede">O que mudou no Media Hub, em linguagem simples.</p>
+          <p class="hero-links">
+            <a href="/">Voltar ao app</a>
+            <a href="https://github.com/ideiasfactory/media-hub/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog técnico</a>
+          </p>
+        </div>
+      </header>
+
+      {% for release in releases %}
+      <article class="card release-card">
+        <p class="eyebrow">v{{ release.version }} · {{ release.date }}</p>
+        <h2>{{ release.title }}</h2>
+        <p class="muted">{{ release.summary }}</p>
+        <ul class="release-list">
+          {% for item in release.highlights %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </article>
+      {% endfor %}
+    </main>
+  </body>
+</html>

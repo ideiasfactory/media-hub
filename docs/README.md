@@ -5,9 +5,10 @@
 | Documento | Conteúdo |
 |-----------|----------|
 | [ROADMAP.md](ROADMAP.md) | Visão estratégica, releases e status dos épicos |
-| [EPICS.md](EPICS.md) | Catálogo detalhado EPIC-001 … EPIC-033 |
+| [EPICS.md](EPICS.md) | Catálogo detalhado EPIC-001 … EPIC-034 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura atual (v0.1) e alvo da plataforma |
 | [DECISIONS.md](DECISIONS.md) | Architecture Decision Records (ADRs) |
+| [VERSIONING.md](VERSIONING.md) | SemVer do produto e contrato `/api/vN` |
 
 ## Como manter
 

@@ -5,14 +5,24 @@ Documentação relacionada: [ROADMAP.md](ROADMAP.md) · [EPICS.md](EPICS.md) ·
 
 ---
 
-## Estado atual (EPIC-001 / v0.1)
+## Estado atual (v0.1.1 — monorepo modular)
 
-O Media Hub v0.1 é um monólito local. O FastAPI serve a página Jinja2, a API JSON
-e os artefatos. O navegador cria um job e consulta o estado por polling.
+O Media Hub continua um **único processo** Uvicorn, agora organizado em camadas
+no monorepo (EPIC-034 / ADR-020):
+
+```
+frontend/   → templates Jinja2 + static (CSS/JS)
+bff/        → HTTP edge: páginas, /api/v1, auth, OpenAPI
+backend/    → domínio: jobs, media, transcription, models, utils
+app/        → composition root (`uvicorn app.main:app`)
+```
+
+O navegador cria um job e consulta o estado por polling. O BFF autentica a UI
+via cookie HttpOnly quando há API Key e delega o processamento ao backend.
 
 ### Fluxo operacional
 
-1. `POST /api/jobs` valida URL, modelo e idioma e retorna um UUID.
+1. `POST /api/v1/jobs` valida URL, modelo e idioma e retorna um UUID.
 2. Uma tarefa de background do FastAPI atualiza o job mantido em memória.
 3. `yt-dlp` obtém metadados e baixa somente o melhor áudio disponível.
 4. O pós-processador do `yt-dlp` usa FFmpeg para gerar `audio.mp3`.
@@ -20,24 +30,28 @@ e os artefatos. O navegador cria um job e consulta o estado por polling.
 6. A aplicação grava TXT, SRT e JSON em `output/{job_id}`.
 7. A UI exibe o resultado e oferece downloads por whitelist fixa.
 
-### Componentes atuais
+### Componentes por camada
 
-| Módulo | Responsabilidade |
-|--------|------------------|
-| `main.py` | App FastAPI, templates, estáticos, health check |
-| `api.py` | Criação, consulta e download de jobs |
-| `jobs.py` | Estado em memória e orquestração do processamento |
-| `media.py` | Integração mínima com yt-dlp / FFmpeg |
-| `transcription.py` | Integração mínima com faster-whisper |
-| `models.py` | Modelos de request/response |
-| `utils.py` | Validação de URL, segurança de arquivos e SRT |
+| Camada | Pacote | Responsabilidade |
+|--------|--------|------------------|
+| Frontend | `frontend/` | `templates/`, `static/` |
+| BFF | `bff/web.py` | Páginas `/`, `/changelog` |
+| BFF | `bff/api/v1.py` | Contrato REST `/api/v1` |
+| BFF | `bff/auth.py` | API Key + cookie UI |
+| BFF | `bff/app.py` | Factory FastAPI, OpenAPI, static mount |
+| Backend | `backend/jobs.py` | Estado em memória e orquestração |
+| Backend | `backend/media.py` | yt-dlp / FFmpeg |
+| Backend | `backend/transcription.py` | faster-whisper |
+| Backend | `backend/models.py` | Schemas de job |
+| Backend | `backend/utils.py` | URL, whitelist, SRT |
+| App | `app/main.py` | Entrypoint `create_app()` |
 
-### Restrições operacionais (v0.1)
+### Restrições operacionais
 
-- Um único processo Uvicorn na porta **8010**.
+- Um único processo Uvicorn na porta **8010** (não são microserviços separados).
 - Jobs existem somente em memória; reinício perde o estado (arquivos no disco
   permanecem).
-- Sem fila persistente, banco, autenticação ou isolamento multiusuário.
+- Sem fila persistente, banco ou isolamento multiusuário.
 - Somente vídeos individuais públicos do YouTube (`noplaylist`).
 
 ### Layout de artefatos
@@ -128,23 +142,24 @@ visualização de transcrições. No v0.1: HTML / CSS / JS puro servidos pelo Fa
 
 Contratos REST: criação de jobs, status, download, pesquisa e futura API pública.
 
-Endpoints atuais (contrato a versionar em EPIC-029, tipicamente `/api/v1/...`):
+Endpoints atuais (contrato `/api/v1`):
 
 | Método | Caminho | Descrição |
 |--------|---------|-----------|
 | `GET` | `/` | Interface web |
-| `GET` | `/health` | Health check (público) |
-| `POST` | `/api/jobs` | Cria job |
-| `GET` | `/api/jobs/{job_id}` | Status e resultado |
-| `GET` | `/api/jobs/{job_id}/files/{filename}` | Download whitelist |
+| `GET` | `/changelog` | Novidades amigáveis |
+| `GET` | `/health` | Health check + versão |
+| `GET` | `/docs` | Swagger UI |
+| `POST` | `/api/v1/jobs` | Cria job |
+| `GET` | `/api/v1/jobs/{job_id}` | Status e resultado |
+| `GET` | `/api/v1/jobs/{job_id}/files/{filename}` | Download whitelist |
 
-Evoluções planejadas de plataforma (v0.1.x):
+Segurança da API (v0.1.1):
 
-- **API Key** via `.env` nos endpoints `/api/*` (EPIC-026 / ADR-015)
-- **OpenAPI / Swagger** em `/docs` (EPIC-027 / ADR-016)
-- **CLI** como cliente da API (EPIC-028)
-- **SemVer** do produto + path versionado do contrato (EPIC-029 / ADR-017)
-- **Release notes** amigáveis na UI + changelog técnico no repo (EPIC-030)
+- `MEDIA_HUB_API_KEY` no `.env` protege `/api/v1/*` (header `X-API-Key` ou Bearer).
+- Sem key configurada, a API permanece aberta para uso local.
+- UI same-origin recebe cookie HttpOnly `media_hub_api_key`.
+- `GET /health`, `/`, `/changelog` e estáticos permanecem públicos.
 
 ### Job Manager
 
@@ -289,13 +304,13 @@ Explicitamente fora de escopo em qualquer versão:
 | Quando | O que introduzir |
 |--------|------------------|
 | EPIC-001 | Monólito funcional, sem interfaces “para o futuro” |
-| EPIC-026–033 | API Key, Swagger, SemVer, release notes, licença, CONTRIBUTING, README |
+| EPIC-026–034 (0.1.1) | API Key, Swagger, SemVer `/api/v1`, release notes, licença, CONTRIBUTING, README, monorepo modular |
+| EPIC-028 | CLI como cliente da API (sem duplicar pipeline) |
 | EPIC-002 / 005 | Extrair `SourceAdapter` quando o segundo adapter exigir |
 | EPIC-003 | Registry JSONL quando deduplicação for prioridade |
 | EPIC-004 | Abstração de storage quando MinIO/S3 for necessário |
 | EPIC-014 | Interface `Transcriber` quando houver segundo engine |
 | EPIC-015 | Redis / workers quando memória deixar de bastar |
 | EPIC-016 | PostgreSQL quando JSONL deixar de escalar |
-| EPIC-028 | CLI como cliente da API (sem duplicar pipeline) |
 
 Decisões formais: [DECISIONS.md](DECISIONS.md).

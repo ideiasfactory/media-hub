@@ -62,7 +62,7 @@ function showResult(job) {
   downloads.replaceChildren();
   job.artifacts.forEach((filename) => {
     const link = document.createElement("a");
-    link.href = `/api/jobs/${encodeURIComponent(job.job_id)}/files/${encodeURIComponent(filename)}`;
+    link.href = `/api/v1/jobs/${encodeURIComponent(job.job_id)}/files/${encodeURIComponent(filename)}`;
     link.textContent = labels[filename];
     link.className = "download-button";
     downloads.appendChild(link);
@@ -129,7 +129,9 @@ async function readError(response) {
 
 async function pollJob(jobId) {
   try {
-    const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`);
+    const response = await fetch(`/api/v1/jobs/${encodeURIComponent(jobId)}`, {
+      credentials: "same-origin",
+    });
     if (response.status === 404) {
       statusLabel.textContent = "Job indisponível";
       statusMessage.textContent =
@@ -175,8 +177,9 @@ form.addEventListener("submit", async (event) => {
     language: form.language.value,
   };
   try {
-    const response = await fetch("/api/jobs", {
+    const response = await fetch("/api/v1/jobs", {
       method: "POST",
+      credentials: "same-origin",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
