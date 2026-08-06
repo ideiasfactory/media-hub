@@ -17,3 +17,4 @@ def test_index() -> None:
     assert "Media Hub" in response.text
     assert "Baixar e Transcrever" in response.text
     assert 'id="job-form"' in response.text
+    assert 'id="copy-transcript"' in response.text

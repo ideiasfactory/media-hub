@@ -3,6 +3,8 @@
 MVP web local para baixar o áudio de um vídeo público do YouTube, transcrevê-lo com
 Whisper e disponibilizar MP3, TXT, SRT e metadados JSON.
 
+Documentação de produto: [docs/](docs/README.md) — roadmap, épicos, arquitetura e ADRs.
+
 ## Requisitos
 
 - Python 3.11 ou superior;

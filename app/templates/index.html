@@ -70,7 +70,17 @@
           <div><dt>Idioma</dt><dd id="video-language"></dd></div>
         </dl>
         <div id="downloads" class="downloads"></div>
-        <h3>Transcrição completa</h3>
+        <div class="transcript-heading">
+          <h3>Transcrição completa</h3>
+          <button id="copy-transcript" class="copy-button" type="button"
+            aria-label="Copiar transcrição completa" title="Copiar transcrição">
+            <svg aria-hidden="true" viewBox="0 0 24 24" width="18" height="18">
+              <path d="M8 7V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-2"/>
+              <rect x="4" y="7" width="12" height="14" rx="2"/>
+            </svg>
+            <span class="copy-label">Copiar</span>
+          </button>
+        </div>
         <div id="transcript" class="transcript"></div>
       </section>
     </main>

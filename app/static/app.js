@@ -6,6 +6,10 @@ const progressLabel = document.querySelector("#progress-label");
 const progressBar = document.querySelector("#progress-bar");
 const progressTrack = document.querySelector(".progress-track");
 const resultPanel = document.querySelector("#result-panel");
+const transcript = document.querySelector("#transcript");
+const copyButton = document.querySelector("#copy-transcript");
+const copyLabel = copyButton.querySelector(".copy-label");
+let pollFailureCount = 0;
 
 const statusNames = {
   queued: "Aguardando",
@@ -43,7 +47,10 @@ function showResult(job) {
   document.querySelector("#video-channel").textContent = metadata.channel;
   document.querySelector("#video-duration").textContent = formatDuration(metadata.duration_seconds);
   document.querySelector("#video-language").textContent = metadata.detected_language || "Não detectado";
-  document.querySelector("#transcript").textContent = job.transcript || "";
+  transcript.textContent = job.transcript || "";
+  copyButton.disabled = !job.transcript;
+  copyLabel.textContent = "Copiar";
+  copyButton.setAttribute("aria-label", "Copiar transcrição completa");
 
   const labels = {
     "audio.mp3": "Download MP3",
@@ -63,6 +70,52 @@ function showResult(job) {
   resultPanel.hidden = false;
 }
 
+function fallbackCopy(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.setAttribute("readonly", "");
+  textArea.style.position = "fixed";
+  textArea.style.top = "0";
+  textArea.style.left = "0";
+  textArea.style.width = "1px";
+  textArea.style.height = "1px";
+  textArea.style.padding = "0";
+  textArea.style.border = "0";
+  textArea.style.fontSize = "16px";
+  textArea.style.opacity = "0.01";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  textArea.setSelectionRange(0, textArea.value.length);
+  const copied = document.execCommand("copy");
+  textArea.remove();
+  if (!copied) throw new Error("Falha ao copiar.");
+}
+
+async function copyTranscript() {
+  const text = transcript.textContent.trim();
+  if (!text) return;
+
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+    } else {
+      fallbackCopy(text);
+    }
+    copyLabel.textContent = "Copiado!";
+    copyButton.setAttribute("aria-label", "Transcrição copiada");
+  } catch {
+    copyLabel.textContent = "Não copiou";
+    copyButton.setAttribute("aria-label", "Não foi possível copiar a transcrição");
+  }
+  window.setTimeout(() => {
+    copyLabel.textContent = "Copiar";
+    copyButton.setAttribute("aria-label", "Copiar transcrição completa");
+  }, 2000);
+}
+
+copyButton.addEventListener("click", copyTranscript);
+
 async function readError(response) {
   try {
     const data = await response.json();
@@ -77,8 +130,16 @@ async function readError(response) {
 async function pollJob(jobId) {
   try {
     const response = await fetch(`/api/jobs/${encodeURIComponent(jobId)}`);
+    if (response.status === 404) {
+      statusLabel.textContent = "Job indisponível";
+      statusMessage.textContent =
+        "Este job não existe mais. O servidor pode ter reiniciado; inicie um novo processamento.";
+      submitButton.disabled = false;
+      return;
+    }
     if (!response.ok) throw new Error(await readError(response));
     const job = await response.json();
+    pollFailureCount = 0;
     updateStatus(job);
     if (job.status === "completed") {
       showResult(job);
@@ -91,15 +152,20 @@ async function pollJob(jobId) {
     }
     window.setTimeout(() => pollJob(jobId), 1000);
   } catch (error) {
-    statusLabel.textContent = "Erro";
-    statusMessage.textContent = error.message;
-    submitButton.disabled = false;
+    pollFailureCount += 1;
+    const retryDelay = Math.min(1000 * pollFailureCount, 5000);
+    statusLabel.textContent = "Reconectando";
+    statusMessage.textContent = navigator.onLine
+      ? `Não foi possível atualizar o status. Nova tentativa automática em ${retryDelay / 1000}s; o processamento continua no servidor.`
+      : "O dispositivo está sem conexão. O acompanhamento será retomado automaticamente.";
+    window.setTimeout(() => pollJob(jobId), retryDelay);
   }
 }
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
   resultPanel.hidden = true;
+  pollFailureCount = 0;
   submitButton.disabled = true;
   updateStatus({ status: "queued", progress: 0, message: "Criando job..." });
 

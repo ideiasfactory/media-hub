@@ -18,6 +18,7 @@
 8. Manter compatibilidade com Python 3.11+.
 9. Para o MVP, executar com um único processo Uvicorn e manter jobs em memória.
 10. Registrar limitações conhecidas no README e decisões relevantes em `docs/DECISIONS.md`.
+11. Manter `docs/ROADMAP.md`, `docs/EPICS.md` e `docs/ARCHITECTURE.md` alinhados ao escopo autorizado; não implementar épicos futuros sem aprovação explícita.
 
 ## Arquitetura inicial
 
