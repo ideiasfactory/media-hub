@@ -1,13 +1,18 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import FileResponse
 
+from app.auth import require_api_key
 from app.jobs import OUTPUT_ROOT, job_store, process_job
 from app.models import JobRequest, JobResponse
 from app.utils import resolve_artifact
 
-router = APIRouter(prefix="/api")
+router = APIRouter(
+    prefix="/api/v1",
+    tags=["jobs"],
+    dependencies=[Depends(require_api_key)],
+)
 
 
 @router.post("/jobs", response_model=JobResponse, status_code=202)

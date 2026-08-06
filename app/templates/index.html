@@ -12,11 +12,26 @@
       <header class="hero">
         <div class="brand-mark" aria-hidden="true">▶</div>
         <div>
-          <p class="eyebrow">YouTube Web MVP</p>
+          <p class="eyebrow">YouTube Web MVP · v{{ app_version }}</p>
           <h1>Media Hub</h1>
           <p class="lede">Transforme o áudio de um vídeo público em uma transcrição pronta para usar.</p>
+          <p class="hero-links">
+            <a href="/changelog">Novidades</a>
+            <a href="/docs" target="_blank" rel="noopener">API Docs</a>
+          </p>
         </div>
       </header>
+
+      {% if latest_release %}
+      <aside class="release-banner card" aria-label="Novidades da versão">
+        <div>
+          <p class="eyebrow">Novidades · v{{ latest_release.version }}</p>
+          <p class="release-banner-title">{{ latest_release.title }}</p>
+          <p class="muted">{{ latest_release.summary }}</p>
+        </div>
+        <a class="text-link" href="/changelog">Ver todas</a>
+      </aside>
+      {% endif %}
 
       <section class="card">
         <form id="job-form">
@@ -44,6 +59,9 @@
           </div>
           <button id="submit-button" type="submit">Baixar e Transcrever</button>
           <p class="legal">Processe somente conteúdo próprio, autorizado ou permitido pelos termos aplicáveis.</p>
+          {% if api_key_enabled %}
+          <p class="legal">API Key ativa: a interface usa um cookie HttpOnly local; clientes externos devem enviar <code>X-API-Key</code>.</p>
+          {% endif %}
         </form>
       </section>
 

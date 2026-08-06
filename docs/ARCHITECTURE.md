@@ -128,23 +128,24 @@ visualização de transcrições. No v0.1: HTML / CSS / JS puro servidos pelo Fa
 
 Contratos REST: criação de jobs, status, download, pesquisa e futura API pública.
 
-Endpoints atuais (contrato a versionar em EPIC-029, tipicamente `/api/v1/...`):
+Endpoints atuais (contrato `/api/v1`):
 
 | Método | Caminho | Descrição |
 |--------|---------|-----------|
 | `GET` | `/` | Interface web |
-| `GET` | `/health` | Health check (público) |
-| `POST` | `/api/jobs` | Cria job |
-| `GET` | `/api/jobs/{job_id}` | Status e resultado |
-| `GET` | `/api/jobs/{job_id}/files/{filename}` | Download whitelist |
+| `GET` | `/changelog` | Novidades amigáveis |
+| `GET` | `/health` | Health check + versão |
+| `GET` | `/docs` | Swagger UI |
+| `POST` | `/api/v1/jobs` | Cria job |
+| `GET` | `/api/v1/jobs/{job_id}` | Status e resultado |
+| `GET` | `/api/v1/jobs/{job_id}/files/{filename}` | Download whitelist |
 
-Evoluções planejadas de plataforma (v0.1.x):
+Segurança da API (v0.1.1):
 
-- **API Key** via `.env` nos endpoints `/api/*` (EPIC-026 / ADR-015)
-- **OpenAPI / Swagger** em `/docs` (EPIC-027 / ADR-016)
-- **CLI** como cliente da API (EPIC-028)
-- **SemVer** do produto + path versionado do contrato (EPIC-029 / ADR-017)
-- **Release notes** amigáveis na UI + changelog técnico no repo (EPIC-030)
+- `MEDIA_HUB_API_KEY` no `.env` protege `/api/v1/*` (header `X-API-Key` ou Bearer).
+- Sem key configurada, a API permanece aberta para uso local.
+- UI same-origin recebe cookie HttpOnly `media_hub_api_key`.
+- `GET /health`, `/`, `/changelog` e estáticos permanecem públicos.
 
 ### Job Manager
 
@@ -289,13 +290,13 @@ Explicitamente fora de escopo em qualquer versão:
 | Quando | O que introduzir |
 |--------|------------------|
 | EPIC-001 | Monólito funcional, sem interfaces “para o futuro” |
-| EPIC-026–033 | API Key, Swagger, SemVer, release notes, licença, CONTRIBUTING, README |
+| EPIC-026–033 (0.1.1) | API Key, Swagger, SemVer `/api/v1`, release notes, licença, CONTRIBUTING, README |
+| EPIC-028 | CLI como cliente da API (sem duplicar pipeline) |
 | EPIC-002 / 005 | Extrair `SourceAdapter` quando o segundo adapter exigir |
 | EPIC-003 | Registry JSONL quando deduplicação for prioridade |
 | EPIC-004 | Abstração de storage quando MinIO/S3 for necessário |
 | EPIC-014 | Interface `Transcriber` quando houver segundo engine |
 | EPIC-015 | Redis / workers quando memória deixar de bastar |
 | EPIC-016 | PostgreSQL quando JSONL deixar de escalar |
-| EPIC-028 | CLI como cliente da API (sem duplicar pipeline) |
 
 Decisões formais: [DECISIONS.md](DECISIONS.md).

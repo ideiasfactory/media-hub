@@ -421,7 +421,7 @@ observabilidade e integração consolidada com Video Lab.
 
 ## EPIC-026 — API Key via `.env`
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001  
 **ADRs:** 015
@@ -451,7 +451,7 @@ variável de ambiente, sem usuários nem OAuth.
 
 ## EPIC-027 — OpenAPI / Swagger
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001  
 **ADRs:** 016
@@ -504,7 +504,7 @@ mesma API/serviço.
 
 ## EPIC-029 — Versionamento SemVer e contrato da API
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001  
 **ADRs:** 017
@@ -533,7 +533,7 @@ breaking change.
 
 ## EPIC-030 — Release notes (usuário + técnico)
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-029  
 **ADRs:** 019
@@ -565,7 +565,7 @@ Publicar notas de versão em dois níveis: usuário final e time técnico.
 
 ## EPIC-031 — Licenciamento (PolyForm Noncommercial)
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **ADRs:** 018
 
@@ -599,7 +599,7 @@ comercial).
 
 ## EPIC-032 — Documentos e regras de contribuição
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-031 (recomendado)
 
@@ -624,7 +624,7 @@ Definir como a comunidade e o time contribuem com qualidade e segurança.
 
 ## EPIC-033 — README aprimorado e widgets GitHub
 
-**Status:** Planejado  
+**Status:** Concluído  
 **Release:** v0.1.x  
 **Depende de:** EPIC-001; idealmente EPIC-029 e EPIC-031
 

@@ -8,6 +8,7 @@
 | [EPICS.md](EPICS.md) | Catálogo detalhado EPIC-001 … EPIC-033 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura atual (v0.1) e alvo da plataforma |
 | [DECISIONS.md](DECISIONS.md) | Architecture Decision Records (ADRs) |
+| [VERSIONING.md](VERSIONING.md) | SemVer do produto e contrato `/api/vN` |
 
 ## Como manter
 

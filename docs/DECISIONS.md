@@ -28,11 +28,11 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-012](#adr-012--metadata-store-jsonl--postgresql) | Metadata Store JSONL → PostgreSQL | Proposed |
 | [ADR-013](#adr-013--sem-contorno-de-drm-auth-ou-geo) | Sem contorno de DRM, auth ou geo | Accepted |
 | [ADR-014](#adr-014--extrair-abstrações-somente-com-uso-imediato) | Extrair abstrações somente com uso imediato | Accepted |
-| [ADR-015](#adr-015--api-key-via-variável-de-ambiente) | API Key via variável de ambiente | Proposed |
-| [ADR-016](#adr-016--openapi--swagger-nativos-do-fastapi) | OpenAPI / Swagger nativos do FastAPI | Proposed |
-| [ADR-017](#adr-017--semver-e-versionamento-do-contrato-da-api) | SemVer e versionamento do contrato da API | Proposed |
-| [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Proposed |
-| [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Proposed |
+| [ADR-015](#adr-015--api-key-via-variável-de-ambiente) | API Key via variável de ambiente | Accepted |
+| [ADR-016](#adr-016--openapi--swagger-nativos-do-fastapi) | OpenAPI / Swagger nativos do FastAPI | Accepted |
+| [ADR-017](#adr-017--semver-e-versionamento-do-contrato-da-api) | SemVer e versionamento do contrato da API | Accepted |
+| [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Accepted |
+| [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Accepted |
 
 ---
 
@@ -385,7 +385,7 @@ exigir a abstração como entrega.
 
 ## ADR-015 — API Key via variável de ambiente
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-026  
 **Evolução:** EPIC-023
@@ -412,7 +412,7 @@ usuários/OAuth e múltiplas keys fica para EPIC-023.
 
 ## ADR-016 — OpenAPI / Swagger nativos do FastAPI
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-027
 
@@ -437,7 +437,7 @@ alinhados ao SemVer do produto.
 
 ## ADR-017 — SemVer e versionamento do contrato da API
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-029
 
@@ -464,7 +464,7 @@ sem sinal claro.
 
 ## ADR-018 — Licença PolyForm Noncommercial 1.0.0
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-031
 
@@ -504,7 +504,7 @@ Alternativas consideradas e rejeitadas para este objetivo:
 
 ## ADR-019 — Release notes em dois níveis
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-030
 
