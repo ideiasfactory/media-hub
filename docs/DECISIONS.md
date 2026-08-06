@@ -33,6 +33,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-017](#adr-017--semver-e-versionamento-do-contrato-da-api) | SemVer e versionamento do contrato da API | Accepted |
 | [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Accepted |
 | [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Accepted |
+| [ADR-020](#adr-020--monorepo-modular-frontend--bff--backend) | Monorepo modular frontend / BFF / backend | Accepted |
 
 ---
 
@@ -528,3 +529,42 @@ Ambos ligados à mesma tag SemVer.
 - Processo de release inclui redigir os dois textos.
 - UI não expõe detalhes internos desnecessários.
 - Time preserva histórico técnico auditável no Git.
+
+---
+
+## ADR-020 — Monorepo modular frontend / BFF / backend
+
+**Status:** Accepted  
+**Data:** 2026-08-06  
+**Épico:** EPIC-034
+
+### Contexto
+
+O MVP nasceu com todos os módulos em `app/`. Isso acelerou a entrega, mas misturou
+apresentação, borda HTTP e domínio no mesmo pacote, dificultando evolução (CLI,
+adapters, workers) sem reorganização posterior.
+
+### Decisão
+
+Manter **um único processo** e um monorepo, separando pastas por camada:
+
+| Camada | Pacote | Papel |
+|--------|--------|-------|
+| Frontend | `frontend/` | Templates e estáticos |
+| BFF | `bff/` | Páginas, `/api/v1`, auth, OpenAPI, factory |
+| Backend | `backend/` | Jobs, media, transcription, models, utils |
+| App | `app/` | Composition root (`uvicorn app.main:app`) |
+
+Regras de dependência:
+
+- `frontend` não importa `backend` nem `bff`;
+- `backend` não importa `bff` nem `frontend`;
+- `bff` orquestra HTTP e chama `backend`;
+- `app` apenas instancia o BFF.
+
+### Consequências
+
+- Clareza de fronteiras sem custo operacional de microserviços.
+- Entrypoint e porta 8010 inalterados (compatível com ADR-001 / ADR-005).
+- Extrair processo/serviço real no futuro fica mais barato.
+- Não introduz Docker, filas ou frontend SPA nesta etapa.

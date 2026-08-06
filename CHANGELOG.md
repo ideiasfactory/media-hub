@@ -22,11 +22,13 @@ Política de contrato da API: [ADR-017](docs/DECISIONS.md#adr-017--semver-e-vers
 - Release notes amigáveis em `/changelog` e endpoint auxiliar `/api/releases`.
 - `GET /health` passa a retornar `version`.
 - README com badges e links de documentação.
+- Monorepo modular: pacotes `frontend/`, `bff/` e `backend/` (EPIC-034 / ADR-020).
 
 ### Changed
 
 - Rotas de jobs movidas de `/api/...` para `/api/v1/...` (breaking para clientes da 0.1.0).
-- ADRs 015–019 marcados como Accepted; épicos 026–027 e 029–033 concluídos.
+- Código de domínio e UI separados do composition root (`app/main.py` só cria o app).
+- ADRs 015–020 marcados como Accepted; épicos 026–027, 029–034 concluídos.
 
 ### Security
 

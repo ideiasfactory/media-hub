@@ -9,6 +9,8 @@
 MVP web local para baixar o áudio de um vídeo público do YouTube, transcrevê-lo com
 Whisper e disponibilizar MP3, TXT, SRT e metadados JSON.
 
+Monorepo modular (um processo): `frontend/` · `bff/` · `backend/` · `app/`.
+
 | | |
 |---|---|
 | Interface | [http://localhost:8010](http://localhost:8010) |
@@ -107,7 +109,7 @@ Os testes unitários não acessam a internet nem carregam modelos Whisper.
 
 ```bash
 pytest
-python -m compileall app
+python -m compileall app backend bff frontend
 ```
 
 ## Arquivos gerados

@@ -7,7 +7,7 @@
 ## Test plan
 
 - [ ] `pytest`
-- [ ] `python -m compileall app`
+- [ ] `python -m compileall app backend bff frontend`
 - [ ] Smoke manual em `http://localhost:8010` (se aplicável)
 
 ## Notes

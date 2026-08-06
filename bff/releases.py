@@ -12,13 +12,14 @@ USER_RELEASES: list[dict[str, Any]] = [
         "version": "0.1.1",
         "date": "2026-08-06",
         "title": "API pronta para integração",
-        "summary": "O Media Hub ganhou proteção por API Key, documentação Swagger, versionamento e novidades na interface.",
+        "summary": "O Media Hub ganhou proteção por API Key, documentação Swagger, versionamento, novidades na interface e organização em camadas no monorepo.",
         "highlights": [
             "Documentação interativa da API em /docs",
             "Endpoints versionados em /api/v1",
             "Proteção opcional por API Key via arquivo .env",
             "Página de novidades para acompanhar as versões",
             "Licença clara para uso não comercial",
+            "Código organizado em frontend, BFF e backend (ainda um único processo)",
         ],
     },
     {

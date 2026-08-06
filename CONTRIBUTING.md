@@ -33,7 +33,7 @@ Opcional: defina `MEDIA_HUB_API_KEY` no `.env` para testar a proteção da API.
 
 ```bash
 pytest
-python -m compileall app
+python -m compileall app backend bff frontend
 ```
 
 Quando houver FFmpeg e rede, faça smoke test com vídeo público curto autorizado.

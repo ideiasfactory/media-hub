@@ -1,4 +1,4 @@
-import app.auth as auth
+import bff.auth as auth
 from fastapi.testclient import TestClient
 
 from app.main import app

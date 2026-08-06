@@ -3,10 +3,10 @@ from __future__ import annotations
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import FileResponse
 
-from app.auth import require_api_key
-from app.jobs import OUTPUT_ROOT, job_store, process_job
-from app.models import JobRequest, JobResponse
-from app.utils import resolve_artifact
+from backend.jobs import OUTPUT_ROOT, job_store, process_job
+from backend.models import JobRequest, JobResponse
+from backend.utils import resolve_artifact
+from bff.auth import require_api_key
 
 router = APIRouter(
     prefix="/api/v1",

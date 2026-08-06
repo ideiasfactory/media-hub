@@ -39,7 +39,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | Release | Foco | Épicos principais |
 |---------|------|-------------------|
 | **v0.1** | Foundation + YouTube Web MVP | EPIC-001 |
-| **v0.1.x** | Governança, DX e contrato | EPIC-026–EPIC-033 |
+| **v0.1.x** | Governança, DX, contrato e monorepo modular | EPIC-026–EPIC-034 |
 | **v0.2** | YouTube Evolution + Registry | EPIC-002, EPIC-003 |
 | **v0.3** | Storage + adapters sociais + CLI | EPIC-004–EPIC-006, EPIC-028 |
 | **v0.4** | Mais adapters + multi-transcriber | EPIC-007–EPIC-014 |
@@ -94,6 +94,7 @@ prioridade alta de higiene de produto.
 | EPIC-031 | Licenciamento (PolyForm Noncommercial) | Concluído |
 | EPIC-032 | Documentos e regras de contribuição | Concluído |
 | EPIC-033 | README aprimorado e widgets GitHub | Concluído |
+| EPIC-034 | Monorepo modular (frontend / BFF / backend) | Concluído |
 
 Detalhamento de cada épico: [EPICS.md](EPICS.md).
 
@@ -106,7 +107,7 @@ Detalhamento de cada épico: [EPICS.md](EPICS.md).
 Aplicação funcional local: URL pública do YouTube → áudio → Whisper local →
 TXT / SRT / JSON + UI e API na porta 8010. **Concluído.**
 
-### v0.1.x — Governança e DX (EPIC-026–033) ✅
+### v0.1.x — Governança e DX (EPIC-026–034) ✅
 
 Higiene de produto (release **0.1.1**):
 
@@ -116,7 +117,9 @@ Higiene de produto (release **0.1.1**):
 - SemVer do app + versionamento do contrato da API (`/api/v1`);
 - release notes amigáveis na UI (`/changelog`) e notas técnicas no repositório;
 - proteção da API por API Key em `.env`;
-- exposição do Swagger/OpenAPI (`/docs`).
+- exposição do Swagger/OpenAPI (`/docs`);
+- monorepo modular com camadas `frontend/`, `bff/` e `backend/` (EPIC-034),
+  mantendo um único processo Uvicorn.
 
 CLI (EPIC-028) permanece planejado para sprint seguinte.
 

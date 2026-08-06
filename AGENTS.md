@@ -22,18 +22,20 @@
 
 ## Arquitetura inicial
 
-- FastAPI e Uvicorn.
-- UI server-side com HTML, CSS e JavaScript puro.
-- yt-dlp e FFmpeg para aquisição e conversão de áudio.
-- faster-whisper para transcrição local.
-- armazenamento local em `output/{job_id}`.
-- sem banco de dados, Redis, Celery, Docker, autenticação ou frontend separado no EPIC-001.
+Monorepo modular em um único processo Uvicorn:
+
+- `frontend/` — HTML/CSS/JS (Jinja2 + static);
+- `bff/` — páginas, API `/api/v1`, auth, OpenAPI;
+- `backend/` — jobs, yt-dlp/FFmpeg, faster-whisper, models/utils;
+- `app/` — composition root (`uvicorn app.main:app`);
+- armazenamento local em `output/{job_id}`;
+- sem banco de dados, Redis, Celery, Docker ou frontend SPA no EPIC-001 / 0.1.x.
 
 ## Comandos obrigatórios antes da entrega
 
 ```bash
 pytest
-python -m compileall app
+python -m compileall app backend bff frontend
 ```
 
 Quando o ambiente possuir FFmpeg e acesso à internet, realizar também um smoke test manual com vídeo público curto e autorizado.

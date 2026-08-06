@@ -1,8 +1,8 @@
 from pathlib import Path
 
-import app.jobs as jobs
-from app.jobs import JobStore
-from app.models import JobRequest, JobStatus
+import backend.jobs as jobs
+from backend.jobs import JobStore
+from backend.models import JobRequest, JobStatus
 
 
 def test_process_job_generates_all_artifacts(monkeypatch, tmp_path: Path) -> None:

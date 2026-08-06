@@ -10,10 +10,10 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
-from app.media import download_audio, fetch_metadata
-from app.models import JobRequest, JobStatus
-from app.transcription import transcribe_audio
-from app.utils import ALLOWED_ARTIFACTS, generate_srt
+from backend.media import download_audio, fetch_metadata
+from backend.models import JobRequest, JobStatus
+from backend.transcription import transcribe_audio
+from backend.utils import ALLOWED_ARTIFACTS, generate_srt
 
 logger = logging.getLogger(__name__)
 OUTPUT_ROOT = Path(__file__).resolve().parent.parent / "output"
