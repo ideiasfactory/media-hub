@@ -169,9 +169,7 @@ def test_process_job_uses_registry_cache(monkeypatch, tmp_path: Path) -> None:
         return audio
 
     monkeypatch.setattr(jobs, "download_audio", counting_download)
-    second = store.create(
-        JobRequest(url="https://youtu.be/video123", model="tiny", force=False)
-    )
+    second = store.create(JobRequest(url="https://youtu.be/video123", model="tiny", force=False))
     jobs.process_job(second.job_id)
     completed = store.get(second.job_id)
     assert completed is not None
@@ -271,16 +269,19 @@ def test_process_job_resumes_from_download_checkpoint(monkeypatch, tmp_path: Pat
 def json_dumps_meta() -> str:
     import json
 
-    return json.dumps(
-        {
-            "video_id": "video123",
-            "title": "Vídeo de teste",
-            "channel": "Canal de teste",
-            "duration_seconds": 3,
-        },
-        ensure_ascii=False,
-        indent=2,
-    ) + "\n"
+    return (
+        json.dumps(
+            {
+                "video_id": "video123",
+                "title": "Vídeo de teste",
+                "channel": "Canal de teste",
+                "duration_seconds": 3,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
+    )
 
 
 def test_request_cancel_stops_job(monkeypatch, tmp_path: Path) -> None:
