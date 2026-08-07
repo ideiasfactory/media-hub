@@ -46,10 +46,20 @@ Relacionado: [EPIC-040](EPICS.md#epic-040--cicd-ihl-homolog-mac-srv-01) ·
 | Runner group | `self-hosted-runner-ideias` |
 | Workflow | `.github/workflows/deploy-homolog.yml` |
 | GitHub Environment | `homolog` |
+| Porta HTTP | `8010` (`MEDIA_HUB_PORT`) |
+| URL LAN (preferencial) | `http://mac-srv-01:8010/` → USB LAN **`192.168.15.23`** |
+| Health | `http://mac-srv-01:8010/health` |
 
 `runs-on: [self-hosted, mac, homolog]` seleciona o nó pelas labels (o nome do
 runner e o grupo são configurados na org/GitHub; o workflow não referencia o
 grupo diretamente).
+
+**Rede no host:** `mac-srv-01` tem Wi‑Fi (`en0`, tipicamente `192.168.15.21`) e
+USB LAN (`en6`, **`192.168.15.23`**). O acesso LAN estável para SSH/HTTP é o
+USB LAN. Em clientes IHL, `/etc/hosts` (e SSH `HostName`) devem apontar
+`mac-srv-01` para **`192.168.15.23`** — `192.168.15.21` costuma ser
+inalcançável a partir de outras máquinas da faixa. mDNS (`mac-srv-01.local`)
+pode anunciar o IP Wi‑Fi; prefira o nome curto via hosts ou o IP `.23`.
 
 ---
 
@@ -192,6 +202,13 @@ gh workflow run deploy-homolog.yml \
 - Logs: `docker compose logs` no `DATA_DIR` do host.
 - Primeira subida pode demorar (deps já na imagem; Whisper baixa modelo no
   primeiro job, não no `/health`).
+- Se `curl http://mac-srv-01:8010/health` timeout mas
+  `curl http://192.168.15.23:8010/health` OK → corrigir `/etc/hosts` (e cache
+  DNS) para `192.168.15.23 mac-srv-01`, não `.21`.
+- Se ambos timeout: host pode ter entrado em idle sleep (`pmset sleep` curto).
+  Wake-on-LAN (`womp`) no USB LAN (`dc:32:62:56:38:91`); no host, manter
+  `caffeinate -dims` (LaunchAgent) ou `sudo pmset -a sleep 0` para papel de
+  servidor. Confirmar container: `docker ps --filter name=media-hub`.
 
 ### Promover RC
 

@@ -958,8 +958,12 @@ com GitHub Actions self-hosted.
    - nome: `mac-srv-01`
    - labels: `mac`, `homolog` (+ `self-hosted`)
    - runner group: `self-hosted-runner-ideias`
+   - acesso LAN preferencial: USB Ethernet **`192.168.15.23`** (não o IP Wi‑Fi
+     `.21` para clientes da rede)
+   - HTTP homolog: porta **8010** → `http://mac-srv-01:8010/health`
 3. Pré-requisitos no host: Docker/Compose operacional; diretório de dados com
-   volumes (ADR-024); acesso de pull ao GHCR.
+   volumes (ADR-024); acesso de pull ao GHCR; host acordado (evitar idle sleep
+   agressivo — `caffeinate` / `pmset`).
 4. Smoke mínimo: `GET /health` após `compose up`.
 5. Segredos (ex.: `MEDIA_HUB_API_KEY`) no GitHub Environment `homolog` ou no
    `.env` do host — nunca no Git.
@@ -968,6 +972,8 @@ com GitHub Actions self-hosted.
 
 - Se o runner estiver offline, o CD fica queued (runbook em CICD.md).
 - Homolog e DEV compartilham o modelo de volumes do EPIC-036.
+- Resolução DNS/`/etc/hosts` errada (`.21`) parece “serviço fora” mesmo com
+  container healthy no USB LAN.
 
 ---
 

@@ -110,6 +110,12 @@ jobs:
             echo "deployed_at: \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\""
             echo "github_run: \"${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}\""
           } > versions.yaml
+          # Persist image ref for host-side `docker compose` without exporting env.
+          if [[ -f .env ]]; then
+            grep -v '^MEDIA_HUB_IMAGE_REF=' .env > .env.tmp || true
+            mv .env.tmp .env
+          fi
+          printf 'MEDIA_HUB_IMAGE_REF="%s"\n' "${MEDIA_HUB_IMAGE_REF}" >> .env
           docker compose pull
           docker compose up -d --remove-orphans
           docker compose ps
