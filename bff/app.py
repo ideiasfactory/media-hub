@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from backend.jobs import OUTPUT_ROOT
+from backend.logging_setup import setup_logging
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
@@ -18,6 +19,7 @@ load_dotenv()
 
 
 def create_app() -> FastAPI:
+    setup_logging()
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
 
     application = FastAPI(

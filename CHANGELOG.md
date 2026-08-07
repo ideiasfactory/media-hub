@@ -11,6 +11,39 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 ## [Unreleased]
 
+### Planned (v0.2 restante / follow-ups)
+
+- Demais itens do EPIC-002 (vídeo, playlists, legendas, qualidade).
+
+### Planned (v0.2.x — próxima prioridade após v0.2)
+
+- EPIC-035: validação de vulnerabilidades (política High/Critical, checklist
+  de app security, secret scanning; ADR-023).
+- EPIC-036: deploy Docker com volumes no host para `.env`/config, `logs/` e
+  `output/` (ADR-024).
+- EPIC-037: documentação operacional alinhada (README, ARCHITECTURE, AGENTS).
+- EPIC-038: comunidade, visibilidade e engajamento (tasks 01–08; ADR-025) —
+  após 035→036→037; prepara contribuição na v0.3.
+
+## [0.2.0] - 2026-08-06
+
+### Added
+
+- Logging local (EPIC-022 fase 1 / ADR-022): console + `logs/media-hub-YYYY-MM-DD.log`
+  em formato estilo Java; retenção 30 dias; arquivo `logs/archive/yyyy-mm.tar.gz`.
+- Content Registry `registry.jsonl` (EPIC-003 / ADR-010) com reuso de artefatos e
+  `force` no `JobRequest` / UI.
+- Cancelamento de jobs (EPIC-002 incremento): `POST /api/v1/jobs/{id}/cancel` e
+  botão na interface.
+- Ícones e PWA leve: favicon, apple-touch-icon, manifest e ícones 192/512.
+- Badges no README (EPIC-033): status do CI em `main`, versão, Python 3.11/3.12,
+  licença, último commit, issues, API e docs.
+
+### Changed
+
+- Documentação de produto alinhada à faixa v0.2.x (segurança → Docker → docs →
+  comunidade / EPIC-038).
+
 ## [0.1.2] - 2026-08-06
 
 ### Added
@@ -68,7 +101,8 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 - Artefatos `audio.mp3`, `transcript.txt`, `transcript.srt`, `metadata.json`.
 - Documentação inicial de roadmap, épicos, arquitetura e ADRs.
 
-[Unreleased]: https://github.com/ideiasfactory/media-hub/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/ideiasfactory/media-hub/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/ideiasfactory/media-hub/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/ideiasfactory/media-hub/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ideiasfactory/media-hub/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ideiasfactory/media-hub/releases/tag/v0.1.0

@@ -104,6 +104,42 @@ input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px r
   margin: 18px 0;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 16px;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.checkbox-row input {
+  width: 18px;
+  min-height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+}
+
+#cancel-button {
+  width: auto;
+  min-width: 120px;
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+
+#cancel-button:hover {
+  background: var(--surface-raised);
+  transform: none;
+}
+
 button, .download-button {
   border: 0;
   background: var(--accent);

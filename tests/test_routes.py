@@ -21,12 +21,35 @@ def test_index() -> None:
     assert 'id="copy-transcript"' in response.text
     assert "/changelog" in response.text
     assert f"v{__version__}" in response.text
+    assert 'rel="apple-touch-icon"' in response.text
+    assert 'rel="manifest"' in response.text
+
+
+def test_app_icons() -> None:
+    favicon = client.get("/favicon.ico")
+    assert favicon.status_code == 200
+    assert favicon.headers["content-type"].startswith("image/")
+    assert favicon.content
+
+    apple = client.get("/apple-touch-icon.png")
+    assert apple.status_code == 200
+    assert apple.headers["content-type"].startswith("image/")
+    assert apple.content[:8] == b"\x89PNG\r\n\x1a\n"
+
+    precomposed = client.get("/apple-touch-icon-precomposed.png")
+    assert precomposed.status_code == 200
+    assert precomposed.content == apple.content
+
+    manifest = client.get("/static/site.webmanifest")
+    assert manifest.status_code == 200
+    assert "Media Hub" in manifest.text
 
 
 def test_changelog_page() -> None:
     response = client.get("/changelog")
     assert response.status_code == 200
     assert "Novidades" in response.text
+    assert "0.2.0" in response.text
     assert "0.1.2" in response.text
     assert "0.1.1" in response.text
 

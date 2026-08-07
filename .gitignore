@@ -6,3 +6,6 @@ __pycache__/
 .DS_Store
 output/*
 !output/.gitkeep
+registry.jsonl
+logs/
+!logs/.gitkeep

@@ -1,9 +1,11 @@
 # Media Hub
 
-[![Version](https://img.shields.io/badge/version-0.1.2-blue.svg)](CHANGELOG.md)
-[![CI](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml)
-[![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
+[![CI](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](CHANGELOG.md)
+[![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/downloads/)
 [![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-lightgrey.svg)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/ideiasfactory/media-hub?label=last%20commit)](https://github.com/ideiasfactory/media-hub/commits/main)
+[![Issues](https://img.shields.io/github/issues/ideiasfactory/media-hub)](https://github.com/ideiasfactory/media-hub/issues)
 [![API](https://img.shields.io/badge/API-/api/v1-orange.svg)](http://localhost:8010/docs)
 [![Docs](https://img.shields.io/badge/docs-roadmap%20%7C%20ADRs-informational.svg)](docs/README.md)
 
@@ -86,8 +88,9 @@ Contrato atual: **`/api/v1`** (SemVer do app em `/health` → campo `version`).
 - `GET /health`: health check + versão;
 - `GET /docs`: Swagger UI;
 - `GET /redoc`: ReDoc;
-- `POST /api/v1/jobs`: cria um job;
+- `POST /api/v1/jobs`: cria um job (`force` opcional para ignorar o registry);
 - `GET /api/v1/jobs/{job_id}`: consulta status e resultado;
+- `POST /api/v1/jobs/{job_id}/cancel`: solicita cancelamento;
 - `GET /api/v1/jobs/{job_id}/files/{filename}`: baixa um artefato permitido.
 
 Quando `MEDIA_HUB_API_KEY` estiver definido, envie o header `X-API-Key` (ou
@@ -125,6 +128,7 @@ pip-audit
 
 O pipeline GitHub Actions (`.github/workflows/ci.yml`) executa lint, Bandit,
 `pip-audit`, Dependency Review (em PRs) e testes em Python 3.11/3.12.
+
 ## Arquivos gerados
 
 Cada job usa `output/{job_id}/` e pode produzir:
@@ -134,17 +138,22 @@ Cada job usa `output/{job_id}/` e pode produzir:
 - `transcript.srt`;
 - `metadata.json`.
 
+Deduplicação: `registry.jsonl` na raiz do projeto (gitignored).  
+Logs: `logs/media-hub-YYYY-MM-DD.log` e arquivos mensais em `logs/archive/yyyy-mm.tar.gz`
+(retenção de 30 dias; formato estilo Java no console e no disco).
+
 ## Limitações conhecidas
 
 - jobs existem somente em memória e são perdidos ao reiniciar a aplicação;
 - execute exatamente um processo Uvicorn; múltiplos workers não compartilham jobs;
-- arquivos antigos não são limpos automaticamente;
+- arquivos antigos em `output/` não são limpos automaticamente;
 - o processamento concorre pelos recursos locais e não possui fila ou limite;
 - modelos são baixados pelo `faster-whisper` na primeira utilização;
 - vídeos indisponíveis, privados, com restrições ou alterações do YouTube podem falhar;
 - somente vídeos individuais do YouTube são aceitos; playlists estão fora do escopo;
 - a qualidade e a velocidade variam conforme áudio, idioma, CPU e modelo;
-- com API Key ativa, o cookie HttpOnly da UI é adequado ao uso local single-tenant.
+- com API Key ativa, o cookie HttpOnly da UI é adequado ao uso local single-tenant;
+- cancelamento interrompe entre etapas do pipeline (não mata FFmpeg/Whisper no meio da chamada).
 
 ## Troubleshooting
 

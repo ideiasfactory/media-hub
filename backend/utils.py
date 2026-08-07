@@ -36,6 +36,28 @@ def is_valid_youtube_url(value: str) -> bool:
         return False
 
 
+def extract_youtube_video_id(value: str) -> str | None:
+    """Best-effort video id from common YouTube URL shapes."""
+    try:
+        parsed = urlparse(value.strip())
+    except ValueError:
+        return None
+    host = (parsed.hostname or "").lower().rstrip(".")
+    if host.endswith("youtu.be"):
+        candidate = parsed.path.strip("/").split("/")[0]
+        return candidate or None
+    if "youtube.com" in host:
+        from urllib.parse import parse_qs
+
+        query = parse_qs(parsed.query)
+        if "v" in query and query["v"]:
+            return query["v"][0] or None
+        parts = [part for part in parsed.path.split("/") if part]
+        if len(parts) >= 2 and parts[0] in {"shorts", "embed", "live"}:
+            return parts[1] or None
+    return None
+
+
 def is_allowed_artifact(filename: str) -> bool:
     return (
         filename in ALLOWED_ARTIFACTS

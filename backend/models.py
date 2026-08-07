@@ -16,12 +16,14 @@ class JobStatus(str, Enum):
     GENERATING_FILES = "generating_files"
     COMPLETED = "completed"
     FAILED = "failed"
+    CANCELLED = "cancelled"
 
 
 class JobRequest(BaseModel):
     url: str = Field(min_length=1, max_length=2048)
     model: str = "base"
     language: str = "autodetect"
+    force: bool = False
 
     @field_validator("url")
     @classmethod
@@ -54,3 +56,4 @@ class JobResponse(BaseModel):
     metadata: dict[str, Any] | None = None
     transcript: str | None = None
     artifacts: list[str] = Field(default_factory=list)
+    cancel_requested: bool = False

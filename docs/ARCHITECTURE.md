@@ -288,14 +288,39 @@ Implementado / obrigatório:
 - validação de URL;
 - whitelist de arquivos de download;
 - proteção contra path traversal;
-- logging;
-- mensagens amigáveis ao usuário.
+- logging (fase 1 do EPIC-022 / ADR-022: console + disco, formato estilo Java);
+- mensagens amigáveis ao usuário;
+- baseline de CI (Bandit, `pip-audit`, Dependency Review, Dependabot) desde 0.1.2.
+
+Planejado (v0.2.x — EPIC-035 / ADR-023):
+
+- política de falha em vulnerabilidades High/Critical;
+- checklist de segurança da aplicação;
+- varredura de segredos; scan de imagem quando houver Docker (EPIC-036).
 
 Explicitamente fora de escopo em qualquer versão:
 
 - cookies de sessão de plataformas;
 - bypass de DRM, login ou restrição geográfica;
 - uso de credenciais de terceiros sem autorização explícita de produto.
+
+---
+
+## Deploy (planejado — EPIC-036 / ADR-024)
+
+Caminho alvo para execução em container (faixa v0.2.x), mantendo um único
+processo Uvicorn:
+
+```
+Host                         Container
+─────                        ─────────
+./.env          ──────────►  config / env
+./logs          ──────────►  /app/logs
+./output        ──────────►  /app/output
+./registry.jsonl ─────────►  registry
+```
+
+Jobs em memória continuam voláteis no restart; apenas disco mapeado persiste.
 
 ---
 
@@ -308,6 +333,9 @@ Explicitamente fora de escopo em qualquer versão:
 | EPIC-028 | CLI como cliente da API (sem duplicar pipeline) |
 | EPIC-002 / 005 | Extrair `SourceAdapter` quando o segundo adapter exigir |
 | EPIC-003 | Registry JSONL quando deduplicação for prioridade |
+| EPIC-022 (fase 1) | Logging local console+disco, retenção 30d, archive `yyyy-mm.tar.gz` |
+| EPIC-035–037 (0.2.x) | Hardening de segurança, Docker com volumes no host, docs operacionais |
+| EPIC-038 (0.2.x) | Comunidade / visibilidade: licença, README discovery, issues, distribuição |
 | EPIC-004 | Abstração de storage quando MinIO/S3 for necessário |
 | EPIC-014 | Interface `Transcriber` quando houver segundo engine |
 | EPIC-015 | Redis / workers quando memória deixar de bastar |
