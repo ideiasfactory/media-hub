@@ -17,7 +17,7 @@ transcrevê-lo e gerar artefatos (MP3, TXT, SRT, metadados). Trata-se de uma
 ferramenta técnica: **não concede, transfere nem implica qualquer direito
 autoral** sobre o conteúdo processado e **não autoriza** qualquer uso ilícito.
 
-A licença PolyForm Noncommercial cobre apenas o **código-fonte do Media Hub**.
+A licença Apache-2.0 cobre apenas o **código-fonte do Media Hub**.
 Não autoriza o uso de obras de terceiros nem qualquer atividade criminosa.
 
 ---
@@ -209,14 +209,13 @@ autoridades quando a lei exigir.
 
 | Documento | Escopo |
 |-----------|--------|
-| [LICENSE](LICENSE) | Direitos sobre o **código** do Media Hub (uso não comercial) |
+| [LICENSE](LICENSE) | Direitos sobre o **código** do Media Hub (Apache-2.0) |
 | Este DISCLAIMER | Uso de **conteúdo**, conduta ilegal e limitação de responsabilidade |
 | [PRIVACY.md](PRIVACY.md) | Tratamento de dados na instância local |
 | [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) | Conduta da comunidade |
 
-Uso comercial do **software** exige acordo separado com a Ideias Factory.
-Isso **não** substitui a necessidade de direitos sobre o **conteúdo** nem
-autoriza qualquer uso ilícito.
+A licença do **software** (Apache-2.0) **não** substitui a necessidade de
+direitos sobre o **conteúdo** nem autoriza qualquer uso ilícito.
 
 ---
 

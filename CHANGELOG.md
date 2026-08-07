@@ -14,16 +14,33 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 ### Planned (v0.2 restante / follow-ups)
 
 - Demais itens do EPIC-002 (vídeo, playlists, legendas, qualidade).
+- EPIC-038 restante: tasks 04, 06, 07, 08 (issues funil, distribuição, métricas).
 
-### Planned (v0.2.x — próxima prioridade após v0.2)
+### Planned (v0.2.x)
 
 - EPIC-035: validação de vulnerabilidades (política High/Critical, checklist
   de app security, secret scanning; ADR-023).
 - EPIC-036: deploy Docker com volumes no host para `.env`/config, `logs/` e
   `output/` (ADR-024).
 - EPIC-037: documentação operacional alinhada (README, ARCHITECTURE, AGENTS).
-- EPIC-038: comunidade, visibilidade e engajamento (tasks 01–08; ADR-025) —
-  após 035→036→037; prepara contribuição na v0.3.
+
+## [0.2.1] - 2026-08-06
+
+### Added
+
+- EPIC-039 / ADR-026: identidade por `SHA256(URL canônica)`; checkpoint no
+  registry (`status`, `last_step`); artefatos em `output/by-content/{hash}/`;
+  retomada automática na segunda execução da mesma URL.
+- EPIC-038 fatia: Apache-2.0 (TASK-038-01); README discovery bilingue + GIF
+  (TASK-038-02); metadados GitHub (TASK-038-03); `docs/ADAPTERS.md` (TASK-038-05).
+- Demo visual: `docs/assets/demo.gif`.
+
+### Changed
+
+- Licença: PolyForm Noncommercial → **Apache License 2.0** (ADR-018 superseded;
+  ADR-025 Accepted).
+- Registry: chave passa a ser hash da URL canônica YouTube (youtu.be / watch /
+  shorts colapsam).
 
 ## [0.2.0] - 2026-08-06
 
@@ -101,7 +118,8 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 - Artefatos `audio.mp3`, `transcript.txt`, `transcript.srt`, `metadata.json`.
 - Documentação inicial de roadmap, épicos, arquitetura e ADRs.
 
-[Unreleased]: https://github.com/ideiasfactory/media-hub/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/ideiasfactory/media-hub/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/ideiasfactory/media-hub/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/ideiasfactory/media-hub/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/ideiasfactory/media-hub/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ideiasfactory/media-hub/compare/v0.1.0...v0.1.1

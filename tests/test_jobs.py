@@ -9,7 +9,8 @@ def test_process_job_generates_all_artifacts(monkeypatch, tmp_path: Path) -> Non
     store = JobStore()
     monkeypatch.setattr(jobs, "job_store", store)
     monkeypatch.setattr(jobs, "OUTPUT_ROOT", tmp_path / "out")
-    monkeypatch.setattr(jobs, "find_by_identity", lambda identity: None)
+    monkeypatch.setattr(jobs, "find_by_identity", lambda *a, **k: None)
+    monkeypatch.setattr(jobs, "find_latest", lambda *a, **k: None)
     monkeypatch.setattr(jobs, "upsert", lambda entry: None)
     monkeypatch.setattr(
         jobs,

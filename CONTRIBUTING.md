@@ -55,7 +55,8 @@ Quando houver FFmpeg e rede, faça smoke test com vídeo público curto autoriza
 - Atualize README/limitações e ADRs quando a decisão mudar.
 - Marque status do épico em `docs/ROADMAP.md` e `docs/EPICS.md`.
 - Não commit `.env`, segredos, cookies ou dados pessoais.
-- Licença do projeto: PolyForm Noncommercial 1.0.0 — contribuições sob os mesmos termos.
+- Licença do projeto: Apache License 2.0 — contribuições sob os mesmos termos.
+  Ver também [docs/ADAPTERS.md](docs/ADAPTERS.md) para propor novos adapters.
 
 ## API e versionamento
 

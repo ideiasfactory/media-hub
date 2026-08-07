@@ -221,19 +221,17 @@ classificação, embeddings, cenas, cortes para Shorts.
 
 ---
 
-## Estratégia de deduplicação (EPIC-003)
+## Estratégia de deduplicação (EPIC-003 / EPIC-039)
 
-Identificador único preferencial:
-
-```
-platform + video_id
-```
-
-Fallback quando não houver `video_id`:
+Identificador único (v0.2.1):
 
 ```
-SHA256(canonical_url + duration + title)
+SHA256(https://www.youtube.com/watch?v={video_id})
 ```
+
+URLs equivalentes (`youtu.be`, `shorts`, `watch?v=`) normalizam para a mesma
+forma canônica antes do hash. Entradas legadas `youtube:{video_id}` ainda são
+reconhecidas na leitura.
 
 Hashes auxiliares: `transcript_hash`, `audio_hash` — para detectar alterações.
 
@@ -242,15 +240,22 @@ Registro inicial (`registry.jsonl`) por conteúdo:
 ```
 content_hash, platform, url, canonical_url, video_id, title, channel,
 duration, published_at, downloaded_at, artifacts, transcript_hash,
-audio_hash, status
+audio_hash, status, last_step, artifact_dir
 ```
+
+**Identidade (v0.2.1 / EPIC-039):** `content_hash = SHA256(canonical_url)` com
+`canonical_url = https://www.youtube.com/watch?v={id}`.
+
+Artefatos estáveis em `output/by-content/{content_hash}/`; cada job espelha
+cópias em `output/{job_id}/` para download.
 
 Fluxo:
 
 ```
-URL → Normalização → Hash → Registry → Existe?
-  → Sim: retorna artefatos
-  → Não: executa pipeline
+URL → Canonicalização → Hash → Registry
+  → ready: reutiliza artefatos
+  → in_progress/failed/cancelled + last_step: retoma
+  → miss ou force: pipeline (checkpoint por etapa)
 ```
 
 Reprocessamento explícito apenas com `force=true`.
