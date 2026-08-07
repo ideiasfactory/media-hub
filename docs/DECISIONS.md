@@ -23,7 +23,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-007](#adr-007--arquitetura-baseada-em-adapters) | Arquitetura baseada em Adapters | Accepted (diretriz) |
 | [ADR-008](#adr-008--interface-transcriber-desacoplada) | Interface Transcriber desacoplada | Accepted (diretriz) |
 | [ADR-009](#adr-009--content-intelligence-desacoplada-da-aquisição) | Content Intelligence desacoplada da aquisição | Accepted (diretriz) |
-| [ADR-010](#adr-010--content-registry-e-deduplicação) | Content Registry e deduplicação | Proposed |
+| [ADR-010](#adr-010--content-registry-e-deduplicação) | Content Registry e deduplicação | Accepted |
 | [ADR-011](#adr-011--storage-filesystem-first) | Storage filesystem-first | Accepted (diretriz) |
 | [ADR-012](#adr-012--metadata-store-jsonl--postgresql) | Metadata Store JSONL → PostgreSQL | Proposed |
 | [ADR-013](#adr-013--sem-contorno-de-drm-auth-ou-geo) | Sem contorno de DRM, auth ou geo | Accepted |
@@ -35,6 +35,10 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Accepted |
 | [ADR-020](#adr-020--monorepo-modular-frontend--bff--backend) | Monorepo modular frontend / BFF / backend | Accepted |
 | [ADR-021](#adr-021--checklist-obrigatório-ao-fechar-uma-versão) | Checklist obrigatório ao fechar uma versão | Accepted |
+| [ADR-022](#adr-022--logging-local-estilo-java-com-retenção-e-arquivo-mensal) | Logging local estilo Java com retenção e arquivo mensal | Accepted |
+| [ADR-023](#adr-023--validação-contínua-de-vulnerabilidades) | Validação contínua de vulnerabilidades | Proposed |
+| [ADR-024](#adr-024--deploy-docker-com-volumes-no-host) | Deploy Docker com volumes no host | Proposed |
+| [ADR-025](#adr-025--comunidade-visibilidade-e-engajamento) | Comunidade, visibilidade e engajamento | Proposed |
 
 ---
 
@@ -263,7 +267,7 @@ saídas normalizadas, não o downloader.
 
 ## ADR-010 — Content Registry e deduplicação
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-003
 
@@ -283,6 +287,8 @@ qualquer download. Identidade preferencial: `platform + video_id`; fallback
 - Cache semântico de conteúdos entre jobs.
 - Substituição futura por PostgreSQL (ADR-012 / EPIC-016).
 - Ainda não implementado no EPIC-001.
+- Implementado na v0.2: `registry.jsonl` na raiz do projeto, consultado em
+  `process_job`; `force=true` no `JobRequest` ignora o cache.
 
 ---
 
@@ -619,3 +625,166 @@ de release notes (ADR-019).
 - Agentes e contribuidores têm um procedimento explícito (também espelhado em
   `docs/VERSIONING.md`).
 - Custo pequeno e constante por release; evita retrabalho pós-tag.
+
+---
+
+## ADR-022 — Logging local estilo Java com retenção e arquivo mensal
+
+**Status:** Accepted  
+**Data:** 2026-08-06  
+**Épico:** EPIC-022 (fase 1)  
+**Release:** v0.2
+
+### Contexto
+
+A operação local do Media Hub precisa de logs legíveis no console e persistidos
+em disco para diagnóstico, sem introduzir stack de observabilidade (métricas,
+tracing, dashboards) nesta sprint. O time pediu formato familiar a logs Java
+(padrão próximo a Log4j/Logback) e política clara de retenção/arquivo.
+
+### Decisão
+
+1. **Destinos:** handlers de **console** e **arquivo** com o **mesmo** formatter.
+2. **Formato estilo Java**, por exemplo:
+   `yyyy-MM-dd HH:mm:ss,SSS LEVEL [thread] logger - message`
+3. **Diretório:** `logs/` para arquivos ativos; `logs/archive/` para históricos
+   compactados (ambos fora do Git).
+4. **Retenção:** arquivos de log ativos com idade **> 30 dias** são removidos
+   ou incorporados ao arquivo mensal e em seguida removidos.
+5. **Arquivo mensal:** compactar histórico elegível em
+   `logs/archive/yyyy-mm.tar.gz` (mês civil, ex.: `2026-08.tar.gz`).
+6. **Quando arquivar/limpar:** no startup da aplicação e/ou rotina leve
+   documentada; sem depender de cron externo no MVP da fase 1.
+7. **Fora desta ADR:** envio a SaaS, OpenTelemetry, Prometheus, dashboards
+   (restante do EPIC-022 / v0.7).
+
+Implementação preferencial: `logging` da stdlib (Formatter customizado +
+FileHandler/Rotating ou arquivos diários), sem obrigar Loguru/structlog nesta
+fase.
+
+### Consequências
+
+- Diagnóstico local consistente entre terminal e disco.
+- Disco controlado pela retenção de 30 dias + `tar.gz` mensal.
+- EPIC-022 avança em fatia útil sem antecipar a plataforma de observabilidade.
+- Operadores devem garantir espaço em disco em `logs/` e `logs/archive/`.
+
+---
+
+## ADR-023 — Validação contínua de vulnerabilidades
+
+**Status:** Proposed  
+**Data:** 2026-08-06  
+**Épico:** EPIC-035  
+**Release:** v0.2.x
+
+### Contexto
+
+O CI da 0.1.2 já executa Bandit, `pip-audit`, Dependency Review e Dependabot.
+Antes de Docker e de novos adapters, o produto precisa de uma política explícita
+de severidade, checklist de segurança da aplicação e varredura de segredos —
+sem transformar o MVP local em programa de pentest.
+
+### Decisão
+
+1. Manter e endurecer o baseline de CI: falhar o pipeline em vulnerabilidades
+   de dependência **High/Critical**, com exceções temporárias documentadas
+   (motivo + prazo) quando não houver upgrade viável.
+2. Adotar checklist leve de segurança da aplicação (auth API Key, path
+   traversal, whitelist de downloads, exposição de `.env`, ausência de
+   segredos em logs/UI).
+3. Incluir varredura de segredos no fluxo de contribuição/CI.
+4. Quando existir imagem Docker (EPIC-036), acrescentar scan de imagem
+   (ex.: Trivy) ao build documentado ou ao CI.
+5. Continuar proibindo bypass de DRM/auth/geo (ADR-013).
+
+### Consequências
+
+- Segurança deixa de ser só “ferramentas no CI” e passa a ter critérios de aceite.
+- Adapters sociais (v0.3) entram sobre uma baseline mais clara.
+- Pode atrasar merges se houver CVE High/Critical sem mitigação — risco aceito.
+
+---
+
+## ADR-024 — Deploy Docker com volumes no host
+
+**Status:** Proposed  
+**Data:** 2026-08-06  
+**Épico:** EPIC-036  
+**Release:** v0.2.x
+
+### Contexto
+
+Operadores precisam de um caminho de deploy reproduzível sem abandonar o
+modelo de monólito local (um processo Uvicorn, jobs em memória). Logs
+(ADR-022), artefatos (`output/`) e configuração (`.env`) devem sobreviver ao
+ciclo de vida do container.
+
+### Decisão
+
+1. Entregar `Dockerfile` + `docker-compose` (ou equivalente) com um único
+   serviço Uvicorn na porta **8010**.
+2. Mapear para volumes/arquivos no **host**:
+   - configuração / `.env`
+   - `logs/` (e `logs/archive/`)
+   - `output/`
+   - `registry.jsonl` (Content Registry)
+3. A imagem não embute segredos; `.dockerignore` exclui dados locais.
+4. Jobs em memória permanecem voláteis no restart do container; só disco
+   persistido via volumes.
+5. Sem Kubernetes, multi-réplica ou workers nesta ADR (EPIC-015+).
+
+### Consequências
+
+- Deploy local/homologação fica previsível e documentável (EPIC-037).
+- Dados operacionais ficam no host, facilitando backup e inspeção.
+- ADR-001 (jobs em memória) continua válida dentro do container.
+- Implementação autorizada na v0.2.x; remove Docker da lista de “fora do
+  escopo imediato” ao fechar o épico.
+- Demo “one command” alimenta o funil de descoberta do EPIC-038.
+
+---
+
+## ADR-025 — Comunidade, visibilidade e engajamento
+
+**Status:** Proposed  
+**Data:** 2026-08-06  
+**Épico:** EPIC-038  
+**Release:** v0.2.x (após EPIC-035–037)
+
+### Contexto
+
+O Media Hub já possui higiene de governança (licença, CONTRIBUTING, badges,
+SemVer, CI). O objetivo de produto inclui ganhar **visibilidade e colaboração**
+externa nos adapters e demais features. Stars e forks sozinhos não geram PRs;
+é necessário narrativa, demo, issues contribuíveis e postura de licença
+explícita. A PolyForm Noncommercial (ADR-018) reduz elegibilidade a algumas
+listas “awesome” e adoção comercial — trade-off que deve ser decidido, não
+ignorado.
+
+### Decisão
+
+1. Executar **EPIC-038** na v0.2.x **depois** de hardening (035), Docker (036)
+   e docs operacionais (037), na ordem:
+   `035 → 036 → 037 → 038`.
+2. **TASK-038-01** decide e documenta a postura de licença:
+   - manter Noncommercial + licença comercial sob acordo; **ou**
+   - dual-license; **ou**
+   - migrar para licença OSI permissiva —
+   com consequências registradas (pode revisar ADR-018).
+3. Tratar README + metadados GitHub + demo visual como **vitrine** (não só
+   documentação técnica).
+4. Publicar funil de contribuição (≥5 issues, ≥2 `good first issue`, template
+   New Adapter) **antes** de campanhas de divulgação e **antes** da v0.3.
+5. Distribuição inicial é checklist enxuto (1 post técnico + 1 comunidade +
+   Releases), sem spam; DISCLAIMER e ADR-013 obrigatórios em posts públicos.
+6. Sucesso primário: PRs externos / Discussions úteis; stars/forks são
+   indicadores secundários. Baseline de Insights registrado (TASK-038-08).
+
+### Consequências
+
+- Adapters da v0.3 entram com caminho claro para contribuidores externos.
+- Pode exigir README bilingue e manutenção contínua de issues — custo aceito.
+- Se a licença permanecer Noncommercial, aceitar menor elegibilidade em
+  awesome lists e menos forks comerciais.
+- EPIC-038 não implementa adapters; apenas prepara o funil.

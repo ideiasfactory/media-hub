@@ -19,6 +19,10 @@
 9. Para o MVP, executar com um único processo Uvicorn e manter jobs em memória.
 10. Registrar limitações conhecidas no README e decisões relevantes em `docs/DECISIONS.md`.
 11. Manter `docs/ROADMAP.md`, `docs/EPICS.md` e `docs/ARCHITECTURE.md` alinhados ao escopo autorizado; não implementar épicos futuros sem aprovação explícita.
+12. Após o fechamento da v0.2, a próxima faixa autorizada é **v0.2.x**: EPIC-035
+    (segurança) → EPIC-036 (Docker com volumes) → EPIC-037 (docs) → EPIC-038
+    (comunidade/visibilidade). Não antecipar adapters sociais (v0.3) sem
+    concluir ou reautorizar essa ordem.
 
 ## Arquitetura inicial
 
@@ -30,6 +34,8 @@ Monorepo modular em um único processo Uvicorn:
 - `app/` — composition root (`uvicorn app.main:app`);
 - armazenamento local em `output/{job_id}`;
 - sem banco de dados, Redis, Celery, Docker ou frontend SPA no EPIC-001 / 0.1.x.
+  Docker com volumes no host entra na faixa **v0.2.x** (EPIC-036), após hardening
+  de segurança (EPIC-035).
 
 ## Comandos obrigatórios antes da entrega
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from backend.jobs import OUTPUT_ROOT, job_store, process_job
-from backend.models import JobRequest, JobResponse
+from backend.models import JobRequest, JobResponse, JobStatus
 from backend.utils import resolve_artifact
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from fastapi.responses import FileResponse
@@ -27,6 +27,16 @@ def get_job(job_id: str) -> dict:
     job = job_store.get(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="Job não encontrado.")
+    return job.public()
+
+
+@router.post("/jobs/{job_id}/cancel", response_model=JobResponse)
+def cancel_job(job_id: str) -> dict:
+    job = job_store.request_cancel(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job não encontrado.")
+    if job.status in {JobStatus.COMPLETED, JobStatus.FAILED, JobStatus.CANCELLED}:
+        return job.public()
     return job.public()
 
 

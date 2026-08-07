@@ -1,5 +1,6 @@
 const form = document.querySelector("#job-form");
 const submitButton = document.querySelector("#submit-button");
+const cancelButton = document.querySelector("#cancel-button");
 const statusLabel = document.querySelector("#status-label");
 const statusMessage = document.querySelector("#status-message");
 const progressLabel = document.querySelector("#progress-label");
@@ -10,6 +11,8 @@ const transcript = document.querySelector("#transcript");
 const copyButton = document.querySelector("#copy-transcript");
 const copyLabel = copyButton.querySelector(".copy-label");
 let pollFailureCount = 0;
+let activeJobId = null;
+let pollTimer = null;
 
 const statusNames = {
   queued: "Aguardando",
@@ -19,7 +22,22 @@ const statusNames = {
   generating_files: "Gerando arquivos",
   completed: "Concluído",
   failed: "Erro",
+  cancelled: "Cancelado",
 };
+
+const terminalStatuses = new Set(["completed", "failed", "cancelled"]);
+
+function clearPollTimer() {
+  if (pollTimer) {
+    window.clearTimeout(pollTimer);
+    pollTimer = null;
+  }
+}
+
+function setCancelVisible(visible) {
+  cancelButton.hidden = !visible;
+  cancelButton.disabled = !visible;
+}
 
 function updateStatus(job) {
   const progress = Math.max(0, Math.min(100, job.progress || 0));
@@ -137,22 +155,23 @@ async function pollJob(jobId) {
       statusMessage.textContent =
         "Este job não existe mais. O servidor pode ter reiniciado; inicie um novo processamento.";
       submitButton.disabled = false;
+      setCancelVisible(false);
+      activeJobId = null;
       return;
     }
     if (!response.ok) throw new Error(await readError(response));
     const job = await response.json();
     pollFailureCount = 0;
     updateStatus(job);
-    if (job.status === "completed") {
-      showResult(job);
+    if (terminalStatuses.has(job.status)) {
+      if (job.status === "completed") showResult(job);
       submitButton.disabled = false;
+      setCancelVisible(false);
+      activeJobId = null;
       return;
     }
-    if (job.status === "failed") {
-      submitButton.disabled = false;
-      return;
-    }
-    window.setTimeout(() => pollJob(jobId), 1000);
+    setCancelVisible(true);
+    pollTimer = window.setTimeout(() => pollJob(jobId), 1000);
   } catch (error) {
     pollFailureCount += 1;
     const retryDelay = Math.min(1000 * pollFailureCount, 5000);
@@ -160,21 +179,41 @@ async function pollJob(jobId) {
     statusMessage.textContent = navigator.onLine
       ? `Não foi possível atualizar o status. Nova tentativa automática em ${retryDelay / 1000}s; o processamento continua no servidor.`
       : "O dispositivo está sem conexão. O acompanhamento será retomado automaticamente.";
-    window.setTimeout(() => pollJob(jobId), retryDelay);
+    pollTimer = window.setTimeout(() => pollJob(jobId), retryDelay);
   }
 }
 
+cancelButton.addEventListener("click", async () => {
+  if (!activeJobId) return;
+  cancelButton.disabled = true;
+  try {
+    const response = await fetch(`/api/v1/jobs/${encodeURIComponent(activeJobId)}/cancel`, {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    if (!response.ok) throw new Error(await readError(response));
+    const job = await response.json();
+    updateStatus(job);
+  } catch (error) {
+    statusMessage.textContent = error.message;
+    cancelButton.disabled = false;
+  }
+});
+
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  clearPollTimer();
   resultPanel.hidden = true;
   pollFailureCount = 0;
   submitButton.disabled = true;
+  setCancelVisible(false);
   updateStatus({ status: "queued", progress: 0, message: "Criando job..." });
 
   const body = {
     url: form.url.value,
     model: form.model.value,
     language: form.language.value,
+    force: Boolean(form.force.checked),
   };
   try {
     const response = await fetch("/api/v1/jobs", {
@@ -185,11 +224,15 @@ form.addEventListener("submit", async (event) => {
     });
     if (!response.ok) throw new Error(await readError(response));
     const job = await response.json();
+    activeJobId = job.job_id;
     updateStatus(job);
+    setCancelVisible(true);
     pollJob(job.job_id);
   } catch (error) {
     statusLabel.textContent = "Erro";
     statusMessage.textContent = error.message;
     submitButton.disabled = false;
+    setCancelVisible(false);
+    activeJobId = null;
   }
 });

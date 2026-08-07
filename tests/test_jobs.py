@@ -8,7 +8,9 @@ from backend.models import JobRequest, JobStatus
 def test_process_job_generates_all_artifacts(monkeypatch, tmp_path: Path) -> None:
     store = JobStore()
     monkeypatch.setattr(jobs, "job_store", store)
-    monkeypatch.setattr(jobs, "OUTPUT_ROOT", tmp_path)
+    monkeypatch.setattr(jobs, "OUTPUT_ROOT", tmp_path / "out")
+    monkeypatch.setattr(jobs, "find_by_identity", lambda identity: None)
+    monkeypatch.setattr(jobs, "upsert", lambda entry: None)
     monkeypatch.setattr(
         jobs,
         "fetch_metadata",
@@ -58,4 +60,4 @@ def test_process_job_generates_all_artifacts(monkeypatch, tmp_path: Path) -> Non
         "transcript.txt",
     ]
     for filename in completed.artifacts:
-        assert (tmp_path / job.job_id / filename).is_file()
+        assert (tmp_path / "out" / job.job_id / filename).is_file()

@@ -44,8 +44,8 @@ Content Intelligence, Video Lab.
 
 ## EPIC-002 — YouTube Adapter Evolution
 
-**Status:** Planejado  
-**Release:** v0.2  
+**Status:** Em andamento (incremento cancelamento entregue na v0.2.0; resto aberto)  
+**Release:** v0.2 (incremento) · follow-ups pós-0.2  
 **Depende de:** EPIC-001  
 **ADRs:** 004 (revisão), 007
 
@@ -62,11 +62,28 @@ Evoluir o suporte YouTube além do MVP de áudio individual.
 - Retomada / cancelamento de jobs
 - Melhorias de UX de progresso e erros
 
+### Entregue na v0.2.0 (incremento)
+
+- Cancelamento de jobs em andamento (`POST /api/v1/jobs/{id}/cancel` + botão na UI)
+- Checkbox de **forçar reprocessamento** na UI (integra com EPIC-003)
+
+### Pendente (fora do fechamento 0.2.0)
+
+- Download de vídeo, playlists, legendas existentes, seleção de qualidade
+
+### Critérios de aceite (sprint v0.2)
+
+- Pelo menos um incremento entregue e testável (prioridade a definir no kickoff:
+  vídeo **ou** playlists **ou** cancelamento/UX — sem obrigar o épico inteiro
+  numa única PR) — **atendido** (cancelamento)
+- Sem bypass de DRM/login/geo (ADR-013)
+- Documentação e release notes atualizadas ao fechar a versão (ADR-021)
+
 ---
 
 ## EPIC-003 — Content Registry
 
-**Status:** Planejado  
+**Status:** Concluído (implementação inicial `registry.jsonl` na v0.2.0)  
 **Release:** v0.2  
 **Depende de:** EPIC-001  
 **ADRs:** 010, 012
@@ -99,6 +116,14 @@ URL → Normalização → Hash → Registry → Existe?
 - Fallback: `SHA256(canonical_url + duration + title)`
 - Reprocessar somente com `force=true`
 - Migração futura para PostgreSQL (EPIC-016)
+
+### Critérios de aceite (sprint v0.2)
+
+- Registry em disco (`registry.jsonl`) consultado antes do pipeline
+- Job repetido sem `force` reutiliza artefatos / evita re-download e re-transcrição
+- `force=true` força reprocessamento e atualiza o registro
+- Testes cobrindo hit/miss do registry
+- ADR-010 marcado como Accepted ao concluir
 
 ---
 
@@ -364,12 +389,54 @@ métricas operacionais básicas.
 
 ## EPIC-022 — Observabilidade
 
-**Status:** Planejado  
-**Release:** v0.7
+**Status:** Fase 1 concluída (v0.2.0); restante planejado para v0.7  
+**Release:** v0.2 (fase 1 — logging) · v0.7 (métricas, tracing, dashboards)  
+**Depende de:** EPIC-001  
+**ADRs:** 022
 
-### Escopo
+### Escopo completo
 
 Métricas, tracing, logs estruturados e dashboards.
+
+### Fase 1 — Logging local (entregue na v0.2.0)
+
+Entregar logging operacional sem stack de observabilidade externa:
+
+| Destino | Comportamento |
+|---------|----------------|
+| Console | Mesmo formato “estilo Java” (ver abaixo) |
+| Disco | Arquivos sob `logs/` (gitignored) |
+
+**Formato (estilo Java / Log4j-like), exemplo:**
+
+```text
+2026-08-06 13:35:01,123 INFO  [MainThread] media_hub.jobs - Job abc123 started
+```
+
+Campos mínimos: `timestamp` (`yyyy-MM-dd HH:mm:ss,SSS`), `LEVEL`, `[thread]`,
+`logger`, mensagem. Exceções com stack trace no mesmo handler.
+
+**Retenção e arquivo:**
+
+- Logs ativos/diários em disco com **retenção de 30 dias** (arquivos mais
+  antigos que 30 dias são elegíveis a remoção ou arquivamento).
+- Histórico compactado em **`tar.gz`** com nome no formato **`yyyy-mm`**
+  (ex.: `logs/archive/2026-08.tar.gz`), agrupando o mês civil.
+- Rotação/arquivo pode rodar no startup do processo e/ou sob demanda (job
+  leve); sem cron externo obrigatório no MVP desta fase.
+- Não enviar logs a SaaS (Datadog, CloudWatch, etc.) nesta fase.
+
+**Critérios de aceite (fase 1):**
+
+- Console e arquivo usam o mesmo formatter estilo Java
+- Diretório `logs/` (e `logs/archive/`) documentados; ausentes do Git
+- Política de 30 dias verificável (teste ou rotina documentada)
+- Arquivo mensal `yyyy-mm.tar.gz` gerado para meses elegíveis
+- Sem métricas/tracing/dashboards nesta fase (ficam para o restante do épico)
+
+### Fora da fase 1
+
+Prometheus/OpenTelemetry, dashboards, alertas, correlação distribuída — v0.7.
 
 ---
 
@@ -680,3 +747,232 @@ app/        # composition root (uvicorn app.main:app)
 - `pytest` e `python -m compileall app backend bff frontend` passam
 - documentação de arquitetura atualizada
 - frontend não importa backend; BFF é a única ponte HTTP → domínio
+
+---
+
+## EPIC-035 — Validação de vulnerabilidades de segurança
+
+**Status:** Planejado (próxima prioridade após fechar v0.2)  
+**Release:** v0.2.x  
+**Depende de:** EPIC-001; base de CI já existente (Bandit / `pip-audit` / Dependabot em 0.1.2)  
+**ADRs:** 023
+
+### Objetivo
+
+Estabelecer validação contínua e critérios de aceite de segurança da aplicação,
+além do lint/SAST já presente no CI, antes de expandir superfície (adapters
+sociais e deploy em container).
+
+### Já entregue (baseline 0.1.2 — não reimplementar)
+
+- Ruff + Bandit no CI
+- `pip-audit` + Dependency Review em PRs
+- Dependabot semanal
+
+### Inclui (este épico)
+
+- política de severidade: falhar CI em vulnerabilidades **High/Critical** de
+  dependências (e documentar exceções temporárias com prazo)
+- checklist de segurança da aplicação (OWASP ASVS / cheat sheet leve):
+  auth API Key, path traversal, upload/download whitelist, headers HTTP
+  sensíveis, exposição de `.env` / segredos, logging sem vazamento de keys
+- varredura de segredos no repositório (ex.: GitHub secret scanning e/ou
+  ferramenta no CI)
+- revisão pontual dos endpoints e da UI quanto a XSS refletido / CSRF onde
+  aplicável ao modelo cookie + API Key
+- relatório ou seção em docs com baseline e gaps aceitos para o MVP local
+- quando EPIC-036 existir: scan de imagem de container (ex.: Trivy) no CI ou
+  no fluxo de build documentado
+
+### Critérios de aceite
+
+- CI bloqueia High/Critical em dependências (ou exceção ADR/documentada)
+- checklist de app security executado e gaps registrados
+- nenhum segredo de exemplo real no repo; `.env.example` sem valores sensíveis
+- README / docs descrevem como rodar as verificações localmente
+- sem introduzir bypass de DRM/auth/geo (ADR-013)
+
+### Fora de escopo
+
+- pentest comercial completo
+- WAF / rate limiting distribuído / multi-tenant IAM (EPIC-023)
+- correção de CVEs em dependências transitivas sem caminho de upgrade
+  (registrar como limitação)
+
+---
+
+## EPIC-036 — Deploy Docker com volumes no host
+
+**Status:** Planejado (após ou em paralelo controlado com EPIC-035)  
+**Release:** v0.2.x  
+**Depende de:** EPIC-001; preferencialmente após baseline de segurança (EPIC-035)  
+**ADRs:** 024
+
+### Objetivo
+
+Oferecer uma forma oficial de executar o Media Hub em Docker, mantendo o
+modelo de **um único processo Uvicorn**, com dados persistentes no host via
+volumes mapeados.
+
+### Inclui
+
+- `Dockerfile` (Python 3.11+, FFmpeg instalado, entrypoint `uvicorn app.main:app`)
+- `docker-compose.yml` (ou equivalente) para subir a app na porta **8010**
+- volumes externos no host (obrigatórios):
+
+| Caminho no container | Volume no host (exemplo) | Conteúdo |
+|----------------------|--------------------------|----------|
+| `/app/.env` ou dir de config | `./.env` / `./config` | configurações / API Key |
+| `/app/logs` | `./logs` | logs diários + `archive/` |
+| `/app/output` | `./output` | artefatos por `job_id` |
+| `/app/registry.jsonl` (ou dir) | `./registry.jsonl` | Content Registry (EPIC-003) |
+
+- documentação de build/run, permissões de UID/GID se necessário, e limites
+  conhecidos (jobs em memória continuam voláteis no restart do container)
+- `.dockerignore` para não copiar `output/`, `logs/`, `.env`, `.venv` para a imagem
+- imagem **não** embute segredos; config só via env/arquivo montado
+
+### Critérios de aceite
+
+- `docker compose up` (ou `docker run` documentado) sobe a UI em
+  `http://localhost:8010`
+- logs escritos no volume do host; artefatos em `output/` no host
+- reiniciar o container preserva `output/`, `logs/` e registry no host
+- jobs em memória continuam perdidos no restart (comportamento atual documentado)
+- `pytest` / CI de app não exigem Docker para passar; smoke Docker documentado
+- sem Kubernetes, Swarm ou multi-réplica nesta etapa
+
+### Fora de escopo
+
+- orquestração K8s / Helm
+- workers/Redis (EPIC-015)
+- build multi-arch obrigatório (pode ser follow-up)
+- storage remoto (MinIO/S3 — EPIC-004)
+
+---
+
+## EPIC-037 — Documentação operacional (segurança + Docker)
+
+**Status:** Planejado (acompanha EPIC-035 e EPIC-036)  
+**Release:** v0.2.x  
+**Depende de:** EPIC-035 e/ou EPIC-036 (pode avançar em PR conjunta)  
+**ADRs:** 021, 023, 024
+
+### Objetivo
+
+Atualizar a documentação do produto para refletir hardening de segurança,
+deploy Docker com volumes e a nova ordem de prioridade do roadmap — sem
+duplicar o conteúdo dos épicos.
+
+### Inclui
+
+- README: seção “Docker”, volumes, quick start containerizado, comandos de
+  segurança locais alinhados ao CI
+- `docs/ARCHITECTURE.md`: diagrama/nota de deploy em container + mapeamento
+  de volumes; seção Segurança atualizada com baseline EPIC-035
+- `docs/ROADMAP.md` / `docs/EPICS.md`: status e prioridade de execução
+- `docs/DECISIONS.md`: ADRs 023/024 Accepted ao concluir implementação
+- `AGENTS.md` / `CONTRIBUTING.md`: quando Docker passa a ser caminho suportado
+- limitações conhecidas: jobs em memória vs persistência de disco via volumes
+- release notes (ADR-021) ao fechar a faixa v0.2.x
+
+### Critérios de aceite
+
+- um contribuidores consegue clonar → `docker compose up` → processar job de
+  teste seguindo só o README
+- “fora do escopo” deixa de listar Docker como bloqueado quando o épico fechar
+- links cruzados ROADMAP ↔ EPICS ↔ ADR ↔ ARCHITECTURE coerentes
+- sem documentação órfã de flags/arquivos que não existam no repo
+
+### Fora de escopo (este épico)
+
+- vitrine de descoberta (GIF, matriz de adapters, README EN, topics GitHub,
+  issues `good first issue`, campanhas) — **EPIC-038**
+- mudança de licença / dual-license — TASK-038-01 / ADR-025
+
+---
+
+## EPIC-038 — Comunidade, visibilidade e engajamento open source
+
+**Status:** Planejado (após EPIC-035–037 na v0.2.x)  
+**Release:** v0.2.x (fechamento da faixa) → prepara v0.3  
+**Depende de:** EPIC-032, EPIC-033; preferencialmente após EPIC-036 (demo
+“one command”) e EPIC-037 (docs operacionais)  
+**ADRs:** 018 (revisão), 025
+
+### Objetivo
+
+Tornar o Media Hub um repositório **source-available com alta descoberta e
+colaboração**, medindo sucesso por stars, forks, visitors, Discussions e —
+principalmente — **PRs externos em adapters e features**, sem expandir escopo
+de produto além do funil de comunidade.
+
+### Contexto
+
+O projeto já tem higiene de governança (licença, CONTRIBUTING, badges, SemVer,
+CI). O gargalo para visibilidade é narrativa + demo + issues contribuíveis +
+distribuição. A licença PolyForm Noncommercial (ADR-018) limita adoção
+comercial e parte do efeito rede de OSS permissivo; a postura deve ser
+decidida explicitamente neste épico (TASK-038-01).
+
+### Inclui (visão)
+
+- decisão documentada de licença / dual-license vs. manter Noncommercial
+- README “vitrine”: frase memorável, demo visual, matriz de adapters, EN
+- metadados GitHub (description, topics, social preview)
+- funil de contribuição: labels, `good first issue`, template New Adapter
+- documentação do contrato de Adapter para contribuidores
+- ritmo de Releases e comunicação
+- plano de distribuição inicial (comunidades técnicas)
+- métricas de engajamento (Insights) e ritual de revisão
+
+### Tarefas
+
+| ID | Tarefa | Entrega |
+|----|--------|---------|
+| **TASK-038-01** | Postura de licença e colaboração | ADR-025 + revisão ADR-018: manter Noncommercial, dual-license, ou migração OSI; impacto em forks/awesome lists documentado; README “Licença” atualizado |
+| **TASK-038-02** | Narrativa e README discovery | Frase-gancho no topo; tabela **Adapters** (YouTube ✅ / demais 🔲 → épicos); GIF/demo 20–30s (URL → MP3/TXT/SRT); seção “quando usar vs yt-dlp+Whisper CLI”; README em **inglês** (ou bilingue PT/EN) |
+| **TASK-038-03** | Metadados GitHub | Description curta em EN; topics (`whisper`, `yt-dlp`, `transcription`, `fastapi`, `self-hosted`, `python`, …); Open Graph / social preview se aplicável; Discussions habilitadas (opcional) |
+| **TASK-038-04** | Funil de issues contribuíveis | Labels `good first issue`, `help wanted`, `adapter`; 5–8 issues públicas; ≥2 starters pequenas; template GitHub **New Adapter** com checklist (contrato, testes, ADR-013, sem DRM) |
+| **TASK-038-05** | Contrato Adapter para contribuidores | Doc curta (`docs/` ou seção CONTRIBUTING): onde plugar, critérios de aceite mínimos, referência ADR-007/014; alinhada aos épicos 005+ sem implementar adapters |
+| **TASK-038-06** | Ritmo de Releases | Política: release notes a cada incremento SemVer (ADR-021); GitHub Releases com notas humanas; mencionar contribuidores no CHANGELOG |
+| **TASK-038-07** | Distribuição inicial | Checklist executável (não spam): 1 post técnico (Dev.to/Hashnode); 1 comunidade self-hosted ou AI; Show HN **opcional** após demo estável; PRs em awesome lists **somente se** a licença for aceita; LinkedIn/X com o GIF |
+| **TASK-038-08** | Métricas e ritual | Baseline de Insights (visitors, clones, stars, forks); meta qualitativa: ≥1 PR externo ou Discussion útil; revisão mensal leve no ROADMAP |
+
+### Ordem sugerida das tarefas
+
+1. **TASK-038-01** (bloqueia narrativa de licença e elegibilidade a listas)  
+2. **TASK-038-02** + **TASK-038-03** (vitrine e descoberta no GitHub)  
+3. **TASK-038-04** + **TASK-038-05** (funil antes de pedir colaboração em adapters)  
+4. **TASK-038-06** (ritmo contínuo)  
+5. **TASK-038-07** (só com demo estável — idealmente pós-Docker EPIC-036)  
+6. **TASK-038-08** (acompanhamento)
+
+### Critérios de aceite
+
+- ADR-025 Accepted com postura de licença explícita e consequências
+- README (EN ou bilingue) com demo visual + matriz de adapters
+- topics + description EN configurados no GitHub
+- ≥5 issues abertas; ≥2 com `good first issue`; template New Adapter publicado
+- CONTRIBUTING (ou docs) descreve como propor um adapter
+- checklist de distribuição preenchido ao menos uma vez (ou adiado com motivo)
+- Insights baseline registrado em nota curta (ROADMAP / Discussion / ADR)
+- sem implementação de adapters sociais neste épico (permanecem EPIC-005+)
+- sem bypass de DRM/login/geo (ADR-013); DISCLAIMER permanece obrigatório em posts
+
+### Fora de escopo
+
+- implementar Instagram/TikTok/etc. (v0.3+)
+- mudar arquitetura ou extrair `SourceAdapter` só “para a comunidade” sem segundo uso (ADR-014)
+- programa pago de bounties / sponsorships (pode ser follow-up)
+- marketing pago ou growth hacking agressivo
+- alterar escopo de EPIC-035–037 (este épico consome o resultado deles)
+
+### Dependências e encaixe na v0.2.x
+
+```
+EPIC-035 → EPIC-036 → EPIC-037 → EPIC-038 → (v0.3 adapters)
+```
+
+Docker + docs (036/037) alimentam a demo “one command” usada em TASK-038-02/07.
+Issues de adapters (038-04) preparam contribuição na v0.3 sem antecipar código.

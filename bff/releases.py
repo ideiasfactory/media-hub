@@ -9,6 +9,22 @@ from app import __version__
 # Friendly highlights shown in the UI. Keep language simple and user-oriented.
 USER_RELEASES: list[dict[str, Any]] = [
     {
+        "version": "0.2.0",
+        "date": "2026-08-06",
+        "title": "Registry, logs e cancelamento",
+        "summary": (
+            "O Media Hub evita reprocessar o mesmo vídeo, grava logs locais "
+            "legíveis e permite cancelar um job em andamento pela interface."
+        ),
+        "highlights": [
+            "Reuso automático de áudio e transcrição já gerados (registry)",
+            "Opção de forçar novo processamento quando você quiser",
+            "Botão para cancelar jobs em andamento",
+            "Logs no console e em arquivo, com retenção de 30 dias",
+            "Ícones e atalho para instalar como app no celular/desktop",
+        ],
+    },
+    {
         "version": "0.1.2",
         "date": "2026-08-06",
         "title": "Mais segurança e transparência",

@@ -31,6 +31,40 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 4. Separar aquisição de Content Intelligence.
 5. Evitar reprocessamento redundante (Content Registry / cache).
 6. Não contornar DRM, autenticação, restrições territoriais ou controles de acesso.
+7. Hardening de segurança e caminho de deploy reproduzível **antes** de expandir
+   superfície com novos adapters sociais.
+8. Tratar descoberta e contribuição externa como produto: narrativa, demo,
+   issues contribuíveis e postura de licença explícitas **antes** de pedir
+   colaboração em adapters (EPIC-038).
+
+---
+
+## Prioridade de execução (reavaliada)
+
+Ordem autorizada pelo Product Owner (visibilidade/engajamento após base
+operacional sólida):
+
+| Ordem | Faixa | Foco | Épicos |
+|------:|-------|------|--------|
+| 1 | **v0.2** ✅ | YouTube + Registry + logging local | EPIC-002 (incremento), EPIC-003, EPIC-022 fase 1 |
+| 2 | **v0.2.x** | Hardening + deploy + docs ops | **EPIC-035 → EPIC-036 → EPIC-037** |
+| 3 | **v0.2.x** | Comunidade, visibilidade e engajamento | **EPIC-038** (tasks 01–08) |
+| 4 | **v0.3** | Storage + adapters sociais + CLI | EPIC-004–006, EPIC-028 |
+| 5 | **v0.4+** | Demais adapters, STT, persistência, inteligência | conforme mapa abaixo |
+
+Dentro da **v0.2.x**, a sequência recomendada é:
+
+1. **EPIC-035** — validação de vulnerabilidades (fortalece o baseline de CI 0.1.2)
+2. **EPIC-036** — Docker com volumes no host (`config` / `.env`, `logs/`, `output/`)
+3. **EPIC-037** — documentação operacional alinhada (pode fechar na mesma PR ou
+   imediatamente após 035/036)
+4. **EPIC-038** — postura de licença, README discovery, issues `good first issue`,
+   distribuição e métricas — **depois** da demo “one command” (Docker)
+
+Motivo: ampliar adapters (Instagram/TikTok) sem baseline de segurança e sem
+deploy reproduzível aumenta risco operacional; volumes no host preservam logs e
+artefatos fora do ciclo de vida do container. Pedir colaboração externa sem
+demo, issues pegáveis e decisão de licença gera stars vazias e poucos PRs.
 
 ---
 
@@ -40,12 +74,13 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 |---------|------|-------------------|
 | **v0.1** | Foundation + YouTube Web MVP | EPIC-001 |
 | **v0.1.x** | Governança, DX, contrato e monorepo modular | EPIC-026–EPIC-034 |
-| **v0.2** | YouTube Evolution + Registry | EPIC-002, EPIC-003 |
+| **v0.2** | YouTube Evolution + Registry + logging local | EPIC-002, EPIC-003, EPIC-022 (fase 1) |
+| **v0.2.x** | Segurança, Docker, docs ops, **comunidade** | EPIC-035 → 036 → 037 → **038** |
 | **v0.3** | Storage + adapters sociais + CLI | EPIC-004–EPIC-006, EPIC-028 |
 | **v0.4** | Mais adapters + multi-transcriber | EPIC-007–EPIC-014 |
 | **v0.5** | Persistência e escala | EPIC-015, EPIC-016 |
 | **v0.6** | Inteligência e integração | EPIC-017–EPIC-020 |
-| **v0.7** | Operação e plataforma | EPIC-021–EPIC-024 |
+| **v0.7** | Operação e plataforma | EPIC-021, EPIC-022 (resto), EPIC-023–024 |
 | **v1.0** | Media Hub Platform estável | EPIC-025 |
 
 As releases são orientação de produto; a prioridade de cada épico pode ser
@@ -55,6 +90,9 @@ A faixa **v0.1.x** pode avançar em paralelo ao fechamento do MVP e à v0.2:
 licença, contribuição, README, SemVer, release notes, API Key e Swagger são
 prioridade alta de higiene de produto.
 
+A faixa **v0.2.x** antecede adapters sociais (v0.3): segurança + Docker + docs
+ops + **EPIC-038 (visibilidade)** são o próximo bloco após o fechamento da v0.2.
+
 ---
 
 ## Status dos épicos
@@ -62,8 +100,8 @@ prioridade alta de higiene de produto.
 | Épico | Título | Status |
 |-------|--------|--------|
 | EPIC-001 | Foundation + YouTube Web MVP | Concluído |
-| EPIC-002 | YouTube Adapter Evolution | Planejado |
-| EPIC-003 | Content Registry | Planejado |
+| EPIC-002 | YouTube Adapter Evolution | Em andamento (cancelamento na 0.2.0; resto aberto) |
+| EPIC-003 | Content Registry | Concluído (v0.2.0) |
 | EPIC-004 | Storage Abstraction | Planejado |
 | EPIC-005 | Instagram Adapter | Planejado |
 | EPIC-006 | TikTok Adapter | Planejado |
@@ -82,7 +120,7 @@ prioridade alta de higiene de produto.
 | EPIC-019 | Search API | Planejado |
 | EPIC-020 | Embeddings | Planejado |
 | EPIC-021 | Administração | Planejado |
-| EPIC-022 | Observabilidade | Planejado |
+| EPIC-022 | Observabilidade | Fase 1 concluída (v0.2.0); resto planejado (v0.7) |
 | EPIC-023 | Autenticação completa (usuários / OAuth) | Planejado |
 | EPIC-024 | Billing | Planejado |
 | EPIC-025 | Media Hub Platform 1.0 | Planejado |
@@ -95,6 +133,10 @@ prioridade alta de higiene de produto.
 | EPIC-032 | Documentos e regras de contribuição | Concluído |
 | EPIC-033 | README aprimorado e widgets GitHub | Concluído |
 | EPIC-034 | Monorepo modular (frontend / BFF / backend) | Concluído |
+| EPIC-035 | Validação de vulnerabilidades de segurança | Planejado (v0.2.x — prioridade 1) |
+| EPIC-036 | Deploy Docker com volumes no host | Planejado (v0.2.x — prioridade 2) |
+| EPIC-037 | Documentação operacional (segurança + Docker) | Planejado (v0.2.x — prioridade 3) |
+| EPIC-038 | Comunidade, visibilidade e engajamento open source | Planejado (v0.2.x — prioridade 4) |
 
 Detalhamento de cada épico: [EPICS.md](EPICS.md).
 
@@ -109,7 +151,7 @@ TXT / SRT / JSON + UI e API na porta 8010. **Concluído.**
 
 ### v0.1.x — Governança e DX (EPIC-026–034) ✅
 
-Higiene de produto (release **0.1.1**):
+Higiene de produto (release **0.1.1** / **0.1.2**):
 
 - licença source-available sem uso comercial (PolyForm Noncommercial);
 - CONTRIBUTING / CODE_OF_CONDUCT / PR template;
@@ -119,19 +161,38 @@ Higiene de produto (release **0.1.1**):
 - proteção da API por API Key em `.env`;
 - exposição do Swagger/OpenAPI (`/docs`);
 - monorepo modular com camadas `frontend/`, `bff/` e `backend/` (EPIC-034),
-  mantendo um único processo Uvicorn.
+  mantendo um único processo Uvicorn;
+- CI com lint, Bandit, `pip-audit` e Dependency Review (baseline de segurança).
 
-CLI (EPIC-028) permanece planejado para sprint seguinte.
+CLI (EPIC-028) permanece planejado para **v0.3**.
 
-### v0.2 — YouTube Evolution + Registry (EPIC-002, EPIC-003)
+### v0.2 — YouTube + Registry + logging (✅ 0.2.0)
 
-Melhorias no adaptador YouTube (vídeo, playlists, legendas, cancelamento) e
-camada de deduplicação via Content Registry (`registry.jsonl`).
+| Épico | Entrega na sprint |
+|-------|-------------------|
+| **EPIC-002** | Incremento: cancelamento de jobs; resto (vídeo, playlists, legendas, qualidade) fica como follow-up |
+| **EPIC-003** | Content Registry em `registry.jsonl` com deduplicação e `force=true` |
+| **EPIC-022 (fase 1)** | Logs no console e em disco, formato estilo Java; retenção 30 dias; arquivo mensal `yyyy-mm.tar.gz` ([ADR-022](DECISIONS.md#adr-022--logging-local-estilo-java-com-retenção-e-arquivo-mensal)) |
+
+### Próxima faixa / v0.2.x — Segurança + Docker + docs + comunidade
+
+Escopo autorizado para a faixa imediatamente após o fechamento da v0.2:
+
+| Ordem | Épico | Entrega |
+|------:|-------|---------|
+| 1 | **EPIC-035** | Validação de vulnerabilidades além do baseline CI; política High/Critical; checklist de app security |
+| 2 | **EPIC-036** | Docker / Compose com volumes de `.env`/config, `logs/` e `output/` no host ([ADR-024](DECISIONS.md#adr-024--deploy-docker-com-volumes-no-host)) |
+| 3 | **EPIC-037** | Documentação operacional (README, ARCHITECTURE, CONTRIBUTING/AGENTS, release notes) |
+| 4 | **EPIC-038** | Visibilidade e engajamento: licença (ADR-025), README discovery, issues, distribuição ([ADR-025](DECISIONS.md#adr-025--comunidade-visibilidade-e-engajamento)) |
+
+Fora desta faixa: Instagram/TikTok, Redis/Postgres, métricas/tracing (resto EPIC-022).
 
 ### v0.3 — Storage + Instagram / TikTok + CLI (EPIC-004–006, EPIC-028)
 
 Abstração de storage (Filesystem → MinIO → S3), primeiros adapters além do
-YouTube e CLI estável para automação, sem alterar regras de negócio.
+YouTube e CLI estável para automação, **depois** do hardening/deploy/comunidade
+da v0.2.x — com issues `good first issue` / New Adapter já publicadas no
+EPIC-038.
 
 ### v0.4 — Ecossistema de fontes e transcribers (EPIC-007–014)
 
@@ -149,8 +210,9 @@ Content Intelligence, integração com Video Lab, Search API e embeddings para R
 
 ### v0.7 — Operação (EPIC-021–024)
 
-Admin, observabilidade, autenticação completa (usuários/OAuth — evolução da
-API Key do EPIC-026) e billing.
+Admin, restante da observabilidade (métricas/tracing/dashboards — EPIC-022),
+autenticação completa (usuários/OAuth — evolução da API Key do EPIC-026) e
+billing.
 
 ### v1.0 — Platform (EPIC-025)
 
@@ -162,11 +224,14 @@ Primeira versão considerada estável da plataforma de ingestão multimídia.
 
 Itens abaixo permanecem fora até o épico correspondente ser autorizado:
 
-- Instagram, TikTok e demais adapters (antes de EPIC-005+)
-- banco de dados, Redis, Celery, Docker, Kubernetes
+- Instagram, TikTok e demais adapters (antes de EPIC-005+; **depois** da v0.2.x,
+  incluindo EPIC-038)
+- banco de dados, Redis, Celery, Kubernetes (Docker da v0.2.x **não** inclui K8s)
 - autenticação completa com usuários/OAuth e billing (EPIC-023 / EPIC-024);
   API Key simples é EPIC-026
 - frontend separado (React / Vue / Next.js)
 - bypass de DRM, login, cookies ou restrições geográficas
 - Content Intelligence e integração Video Lab (antes de EPIC-017 / EPIC-018)
-- uso comercial do código sem licença comercial adicional (ADR-018)
+- métricas, tracing e dashboards (resto do EPIC-022 — fase 1 de logging é v0.2)
+- uso comercial do código sem licença comercial adicional (ADR-018), salvo
+  revisão explícita na TASK-038-01 / ADR-025
