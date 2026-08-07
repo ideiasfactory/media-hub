@@ -44,7 +44,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-028](#adr-028--semver-rc-e-prereleases-de-artefato) | SemVer + RC/dev prereleases de artefato | Accepted |
 | [ADR-029](#adr-029--ambiente-como-desired-state) | Ambiente como desired state (sem env branches) | Accepted (amended by ADR-033) |
 | [ADR-030](#adr-030--ghcr-e-identidade-por-digest) | GHCR e identidade por digest | Accepted |
-| [ADR-031](#adr-031--homologação-em-mac-srv-01) | Homologação IHL (runner self-hosted) | Accepted (amended by ADR-033) |
+| [ADR-031](#adr-031--homologação-ihl-runner-self-hosted) | Homologação IHL (runner self-hosted) | Accepted (amended by ADR-033) |
 | [ADR-032](#adr-032--dev-compose-prod-adiado-gitops-ready) | DEV Compose; PROD adiado; GitOps-ready | Accepted (amended by ADR-033) |
 | [ADR-033](#adr-033--artefato-público-promote-privado-media-hub-ops) | Artefato público / promote privado (`media-hub-ops`) | Accepted |
 
