@@ -31,14 +31,15 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-015](#adr-015--api-key-via-variável-de-ambiente) | API Key via variável de ambiente | Accepted |
 | [ADR-016](#adr-016--openapi--swagger-nativos-do-fastapi) | OpenAPI / Swagger nativos do FastAPI | Accepted |
 | [ADR-017](#adr-017--semver-e-versionamento-do-contrato-da-api) | SemVer e versionamento do contrato da API | Accepted |
-| [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Accepted |
+| [ADR-018](#adr-018--licença-polyform-noncommercial-100) | Licença PolyForm Noncommercial 1.0.0 | Superseded by ADR-018b / Apache-2.0 |
 | [ADR-019](#adr-019--release-notes-em-dois-níveis) | Release notes em dois níveis | Accepted |
 | [ADR-020](#adr-020--monorepo-modular-frontend--bff--backend) | Monorepo modular frontend / BFF / backend | Accepted |
 | [ADR-021](#adr-021--checklist-obrigatório-ao-fechar-uma-versão) | Checklist obrigatório ao fechar uma versão | Accepted |
 | [ADR-022](#adr-022--logging-local-estilo-java-com-retenção-e-arquivo-mensal) | Logging local estilo Java com retenção e arquivo mensal | Accepted |
 | [ADR-023](#adr-023--validação-contínua-de-vulnerabilidades) | Validação contínua de vulnerabilidades | Proposed |
 | [ADR-024](#adr-024--deploy-docker-com-volumes-no-host) | Deploy Docker com volumes no host | Proposed |
-| [ADR-025](#adr-025--comunidade-visibilidade-e-engajamento) | Comunidade, visibilidade e engajamento | Proposed |
+| [ADR-025](#adr-025--comunidade-visibilidade-e-engajamento) | Comunidade, visibilidade e engajamento | Accepted |
+| [ADR-026](#adr-026--identidade-por-url-canônica-e-checkpoint-de-jobs) | Identidade por URL canônica e checkpoint de jobs | Accepted |
 
 ---
 
@@ -269,7 +270,7 @@ saídas normalizadas, não o downloader.
 
 **Status:** Accepted  
 **Data:** 2026-08-06  
-**Épico:** EPIC-003
+**Épico:** EPIC-003; revisado por EPIC-039
 
 ### Contexto
 
@@ -278,17 +279,18 @@ Reprocessar o mesmo vídeo gera custo de rede, CPU e disco desnecessários.
 ### Decisão
 
 Introduzir Content Registry (inicialmente `registry.jsonl`) consultado antes de
-qualquer download. Identidade preferencial: `platform + video_id`; fallback
-`SHA256(canonical_url + duration + title)`. Hashes auxiliares: `audio_hash`,
-`transcript_hash`. Reprocessar só com `force=true`.
+qualquer download. Hashes auxiliares: `audio_hash`, `transcript_hash`.
+Reprocessar só com `force=true`.
+
+**Identidade (desde EPIC-039 / ADR-026):** `SHA256(canonical_youtube_url)` —
+URLs equivalentes (`youtu.be` / `watch?v=` / `shorts`) colapsam na mesma chave.
+A forma antiga `platform:video_id` permanece legível para migração.
 
 ### Consequências
 
 - Cache semântico de conteúdos entre jobs.
 - Substituição futura por PostgreSQL (ADR-012 / EPIC-016).
-- Ainda não implementado no EPIC-001.
-- Implementado na v0.2: `registry.jsonl` na raiz do projeto, consultado em
-  `process_job`; `force=true` no `JobRequest` ignora o cache.
+- Implementado na v0.2: `registry.jsonl`; v0.2.1: checkpoint/retomada (ADR-026).
 
 ---
 
@@ -472,41 +474,27 @@ sem sinal claro.
 
 ## ADR-018 — Licença PolyForm Noncommercial 1.0.0
 
-**Status:** Accepted  
+**Status:** Superseded (substituída por Apache-2.0 na v0.2.1 — ver ADR-025)  
 **Data:** 2026-08-06  
 **Épico:** EPIC-031
 
 ### Contexto
 
-O código deve permanecer público para estudo e contribuição, **sem** autorizar
+O código deveria permanecer público para estudo e contribuição, **sem** autorizar
 uso comercial gratuito. Licenças OSI (MIT, Apache, GPL) permitem uso comercial e
-não atendem ao requisito.
+não atendiam ao requisito original da v0.1.x.
 
-### Decisão
+### Decisão (histórica)
 
-Adotar a **PolyForm Noncommercial License 1.0.0** como licença do repositório.
+Adotar a **PolyForm Noncommercial License 1.0.0** como licença do repositório
+até a v0.2.0.
 
-- Permite uso, modificação e redistribuição para fins **não comerciais**.
-- Uso comercial exige licença/acordo separado com a Ideias Factory.
-- Trata-se de licença **source-available**, não “Open Source” no sentido OSI —
-  a restrição comercial é intencional.
+### Superação
 
-Alternativas consideradas e rejeitadas para este objetivo:
-
-| Licença | Motivo da rejeição |
-|---------|-------------------|
-| MIT / Apache-2.0 | Permitem uso comercial irrestrito |
-| GPL / AGPL | Permitem uso comercial (com copyleft) |
-| CC BY-NC 4.0 | Voltada a conteúdo; inadequada como licença principal de software |
-| Commons Clause + Apache | Mais frágil/confusa que PolyForm para o mesmo fim |
-
-### Consequências
-
-- Arquivo `LICENSE` + seção clara no README.
-- Contribuições sob a mesma licença (via CONTRIBUTING / DCO ou CLA simples).
-- Uso comercial interno da Ideias Factory ou de clientes exige instrumento
-  comercial à parte.
-- Badges devem dizer a licença real (PolyForm Noncommercial), não “MIT”.
+Na v0.2.1 (TASK-038-01 / ADR-025) o projeto migrou para **Apache License 2.0**
+para ampliar engajamento open source (forks, awesome lists, uso comercial
+compatível com a licença). O DISCLAIMER e a ADR-013 continuam a reger uso de
+conteúdos de terceiros.
 
 ---
 
@@ -747,10 +735,10 @@ ciclo de vida do container.
 
 ## ADR-025 — Comunidade, visibilidade e engajamento
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-038  
-**Release:** v0.2.x (após EPIC-035–037)
+**Release:** v0.2.1 (fatia 01/02/03/05; PO reautorizou antes de 035–037)
 
 ### Contexto
 
@@ -758,33 +746,61 @@ O Media Hub já possui higiene de governança (licença, CONTRIBUTING, badges,
 SemVer, CI). O objetivo de produto inclui ganhar **visibilidade e colaboração**
 externa nos adapters e demais features. Stars e forks sozinhos não geram PRs;
 é necessário narrativa, demo, issues contribuíveis e postura de licença
-explícita. A PolyForm Noncommercial (ADR-018) reduz elegibilidade a algumas
-listas “awesome” e adoção comercial — trade-off que deve ser decidido, não
-ignorado.
+explícita. A PolyForm Noncommercial (ADR-018) reduzia elegibilidade a algumas
+listas “awesome” e adoção comercial.
 
 ### Decisão
 
-1. Executar **EPIC-038** na v0.2.x **depois** de hardening (035), Docker (036)
-   e docs operacionais (037), na ordem:
-   `035 → 036 → 037 → 038`.
-2. **TASK-038-01** decide e documenta a postura de licença:
-   - manter Noncommercial + licença comercial sob acordo; **ou**
-   - dual-license; **ou**
-   - migrar para licença OSI permissiva —
-   com consequências registradas (pode revisar ADR-018).
-3. Tratar README + metadados GitHub + demo visual como **vitrine** (não só
-   documentação técnica).
-4. Publicar funil de contribuição (≥5 issues, ≥2 `good first issue`, template
-   New Adapter) **antes** de campanhas de divulgação e **antes** da v0.3.
-5. Distribuição inicial é checklist enxuto (1 post técnico + 1 comunidade +
-   Releases), sem spam; DISCLAIMER e ADR-013 obrigatórios em posts públicos.
-6. Sucesso primário: PRs externos / Discussions úteis; stars/forks são
-   indicadores secundários. Baseline de Insights registrado (TASK-038-08).
+1. Na **v0.2.1**, executar fatia do **EPIC-038** (tasks 01, 02, 03, 05) em
+   paralelo ao **EPIC-039**, **antes** de 035–037 (reautorização explícita do PO).
+2. **TASK-038-01:** migrar para **Apache License 2.0** (OSI permissiva) —
+   revisa ADR-018.
+3. Tratar README + metadados GitHub + demo visual (GIF) como **vitrine**.
+4. Publicar contrato de Adapter (`docs/ADAPTERS.md`) antes da v0.3.
+5. Tasks 04/06/07/08 e funil completo de issues ficam para follow-up.
+6. Sucesso primário: PRs externos / Discussions úteis; stars/forks secundários.
 
 ### Consequências
 
-- Adapters da v0.3 entram com caminho claro para contribuidores externos.
-- Pode exigir README bilingue e manutenção contínua de issues — custo aceito.
-- Se a licença permanecer Noncommercial, aceitar menor elegibilidade em
-  awesome lists e menos forks comerciais.
+- Maior elegibilidade a awesome lists e forks comerciais.
+- DISCLAIMER e ADR-013 continuam obrigatórios em posts públicos.
 - EPIC-038 não implementa adapters; apenas prepara o funil.
+
+---
+
+## ADR-026 — Identidade por URL canônica e checkpoint de jobs
+
+**Status:** Accepted  
+**Data:** 2026-08-06  
+**Épico:** EPIC-039  
+**Release:** v0.2.1
+
+### Contexto
+
+O registry da v0.2 só gravava `status=ready` ao final. Jobs interrompidos
+(falha, cancelamento, restart do processo) perdiam progresso. A chave
+`platform:video_id` não era explicitamente “hash da URL”, requisito de produto
+para deduplicar pelo endereço canônico do vídeo.
+
+### Decisão
+
+1. **Identidade:** `content_hash = SHA256(canonical_url)` com
+   `canonical_url = https://www.youtube.com/watch?v={id}`.
+2. **Artefatos estáveis:** `output/by-content/{content_hash}/`; espelho em
+   `output/{job_id}/` para a API de download.
+3. **Checkpoint** no `registry.jsonl` após cada etapa:
+   `status` ∈ {`in_progress`, `ready`, `failed`, `cancelled`};
+   `last_step` ∈ {`metadata`, `download`, `transcribe`, `files`, `done`}.
+4. **Retomada:** nova submissão da mesma URL (novo `job_id`) sem `force`
+   continua a partir dos artefatos/`last_step` válidos; `force=true` limpa e
+   reprocessa.
+5. Leituras aceitam entradas legadas `youtube:{id}` quando o `video_id` casa.
+
+### Consequências
+
+- Segunda execução após falha parcial não re-baixa áudio já presente.
+- Disco sob `by-content/` cresce com conteúdos distintos (limpeza ainda manual).
+- Jobs em memória (ADR-001) permanecem; só o checkpoint é persistente.
+
+---
+

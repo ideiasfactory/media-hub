@@ -19,10 +19,10 @@
 9. Para o MVP, executar com um único processo Uvicorn e manter jobs em memória.
 10. Registrar limitações conhecidas no README e decisões relevantes em `docs/DECISIONS.md`.
 11. Manter `docs/ROADMAP.md`, `docs/EPICS.md` e `docs/ARCHITECTURE.md` alinhados ao escopo autorizado; não implementar épicos futuros sem aprovação explícita.
-12. Após o fechamento da v0.2, a próxima faixa autorizada é **v0.2.x**: EPIC-035
-    (segurança) → EPIC-036 (Docker com volumes) → EPIC-037 (docs) → EPIC-038
-    (comunidade/visibilidade). Não antecipar adapters sociais (v0.3) sem
-    concluir ou reautorizar essa ordem.
+12. Após o fechamento da v0.2 / v0.2.1, a próxima faixa autorizada é **v0.2.x**:
+    EPIC-035 (segurança) → EPIC-036 (Docker com volumes) → EPIC-037 (docs) →
+    EPIC-038 restante. Não antecipar adapters sociais (v0.3) sem concluir ou
+    reautorizar essa ordem. (A fatia 038 + EPIC-039 na 0.2.1 foi reautorizada.)
 
 ## Arquitetura inicial
 

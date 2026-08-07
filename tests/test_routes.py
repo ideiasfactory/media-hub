@@ -49,6 +49,7 @@ def test_changelog_page() -> None:
     response = client.get("/changelog")
     assert response.status_code == 200
     assert "Novidades" in response.text
+    assert "0.2.1" in response.text
     assert "0.2.0" in response.text
     assert "0.1.2" in response.text
     assert "0.1.1" in response.text

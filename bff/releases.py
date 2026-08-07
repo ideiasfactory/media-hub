@@ -9,6 +9,23 @@ from app import __version__
 # Friendly highlights shown in the UI. Keep language simple and user-oriented.
 USER_RELEASES: list[dict[str, Any]] = [
     {
+        "version": "0.2.1",
+        "date": "2026-08-06",
+        "title": "Retomada, licença aberta e vitrine",
+        "summary": (
+            "Jobs interrompidos podem continuar de onde pararam, o projeto "
+            "passa a Apache-2.0 e o README ganha demo visual para quem descobre "
+            "o repositório."
+        ),
+        "highlights": [
+            "Mesma URL YouTube retoma o processamento após falha ou cancelamento",
+            "Identidade estável pela URL canônica (youtu.be e watch?v= são iguais)",
+            "Licença Apache-2.0 para facilitar forks e uso comercial do código",
+            "README bilingue com GIF de demonstração e matriz de adapters",
+            "Guia para propor novos adapters sem bypass de DRM",
+        ],
+    },
+    {
         "version": "0.2.0",
         "date": "2026-08-06",
         "title": "Registry, logs e cancelamento",

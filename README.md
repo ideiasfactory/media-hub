@@ -1,38 +1,90 @@
 # Media Hub
 
 [![CI](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ideiasfactory/media-hub/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-0.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.2.1-blue.svg)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/downloads/)
-[![License: PolyForm Noncommercial](https://img.shields.io/badge/license-PolyForm%20Noncommercial-lightgrey.svg)](LICENSE)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/ideiasfactory/media-hub?label=last%20commit)](https://github.com/ideiasfactory/media-hub/commits/main)
 [![Issues](https://img.shields.io/github/issues/ideiasfactory/media-hub)](https://github.com/ideiasfactory/media-hub/issues)
 [![API](https://img.shields.io/badge/API-/api/v1-orange.svg)](http://localhost:8010/docs)
 [![Docs](https://img.shields.io/badge/docs-roadmap%20%7C%20ADRs-informational.svg)](docs/README.md)
 
-MVP web local para baixar o áudio de um vídeo público do YouTube, transcrevê-lo com
-Whisper e disponibilizar MP3, TXT, SRT e metadados JSON.
+**Paste a public YouTube URL. Get MP3, transcript, and SRT — on your machine.**
 
-Monorepo modular (um processo): `frontend/` · `bff/` · `backend/` · `app/`.
+Local web MVP: download public YouTube audio, transcribe with Whisper, and download
+MP3 / TXT / SRT / JSON. Modular monorepo, one Uvicorn process:
+`frontend/` · `bff/` · `backend/` · `app/`.
+
+![Media Hub demo](docs/assets/demo.gif)
 
 | | |
 |---|---|
-| Interface | [http://localhost:8010](http://localhost:8010) |
-| Novidades (usuário) | [http://localhost:8010/changelog](http://localhost:8010/changelog) |
+| UI | [http://localhost:8010](http://localhost:8010) |
+| Release notes | [http://localhost:8010/changelog](http://localhost:8010/changelog) |
 | Swagger | [http://localhost:8010/docs](http://localhost:8010/docs) |
-| Changelog técnico | [CHANGELOG.md](CHANGELOG.md) |
-| Produto / ADRs | [docs/](docs/README.md) |
+| Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Architecture (technical) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
+| Product / ADRs | [docs/](docs/README.md) |
 
-## Requisitos
+## Adapters
 
-- Python 3.11 ou superior;
-- FFmpeg disponível no `PATH`;
-- acesso à internet para o processamento de vídeos e para baixar o modelo Whisper
-  na primeira utilização;
-- CPU com espaço em disco e memória compatíveis com o modelo escolhido.
+| Source | Status | Epic |
+|--------|--------|------|
+| YouTube (single public video) | Done | EPIC-001 / 002 / 039 |
+| Instagram | Planned | EPIC-005 |
+| TikTok | Planned | EPIC-006 |
+| Facebook / LinkedIn / Vimeo / Twitch | Planned | EPIC-007–010 |
+| Podcasts / documents / images | Planned | EPIC-011–013 |
 
-### Instalar o FFmpeg
+Propose a new source: [docs/ADAPTERS.md](docs/ADAPTERS.md).
 
-macOS com Homebrew:
+## When to use Media Hub vs yt-dlp + Whisper CLI
+
+| Use Media Hub when… | Prefer CLI scripts when… |
+|---------------------|--------------------------|
+| You want a local UI + `/api/v1` jobs | You only need a one-off shell pipeline |
+| You need registry reuse + resume after failure | You already automate with your own scripts |
+| You want TXT/SRT/JSON artifacts ready for RAG | You do not need HTTP, cancel, or release notes |
+
+Media Hub wraps yt-dlp, FFmpeg and faster-whisper — it does **not** bypass DRM,
+login, cookies, or geo blocks. See [DISCLAIMER.md](DISCLAIMER.md).
+
+---
+
+## Português
+
+**Cole uma URL pública do YouTube. Saia com MP3, transcrição e SRT — na sua máquina.**
+
+MVP web local para baixar áudio de vídeos públicos, transcrever com Whisper e
+baixar MP3 / TXT / SRT / JSON. Monorepo modular (um processo).
+
+### Adapters
+
+| Fonte | Status | Épico |
+|-------|--------|-------|
+| YouTube (vídeo público individual) | Pronto | EPIC-001 / 002 / 039 |
+| Instagram / TikTok / demais | Planejado | EPIC-005+ |
+
+Como propor um adapter: [docs/ADAPTERS.md](docs/ADAPTERS.md).
+
+### Quando usar o Media Hub
+
+Prefira o Hub se quiser UI + API de jobs, reuso via registry e retomada após
+falha. Prefira scripts `yt-dlp` + Whisper se precisar só de um pipeline one-shot
+no terminal.
+
+---
+
+## Requirements
+
+- Python 3.11+;
+- FFmpeg on `PATH`;
+- Network for video fetch and first Whisper model download;
+- CPU / disk suitable for the chosen model.
+
+### Install FFmpeg
+
+macOS (Homebrew):
 
 ```bash
 brew install ffmpeg
@@ -41,17 +93,14 @@ brew install ffmpeg
 Ubuntu/Debian:
 
 ```bash
-sudo apt update
-sudo apt install ffmpeg
+sudo apt update && sudo apt install ffmpeg
 ```
-
-Confirme com:
 
 ```bash
 ffmpeg -version
 ```
 
-## Instalação
+## Install
 
 ```bash
 git clone https://github.com/ideiasfactory/media-hub.git
@@ -64,59 +113,51 @@ python -m pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Opcional — proteja a API definindo no `.env`:
+Optional API protection in `.env`:
 
 ```bash
-MEDIA_HUB_API_KEY=troque-esta-chave
+MEDIA_HUB_API_KEY=change-me
 ```
 
-## Execução
+## Run
 
 ```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 ```
 
-Acesse [http://localhost:8010](http://localhost:8010), cole a URL de um vídeo
-público individual, escolha modelo e idioma e clique em **Baixar e Transcrever**.
+Open [http://localhost:8010](http://localhost:8010), paste a public single-video
+URL, pick model/language, then **Baixar e Transcrever**.
 
 ## API
 
-Contrato atual: **`/api/v1`** (SemVer do app em `/health` → campo `version`).
+Contract: **`/api/v1`** (app SemVer in `/health` → `version`).
 
-- `GET /`: interface web;
-- `GET /changelog`: novidades amigáveis;
-- `GET /health`: health check + versão;
-- `GET /docs`: Swagger UI;
-- `GET /redoc`: ReDoc;
-- `POST /api/v1/jobs`: cria um job (`force` opcional para ignorar o registry);
-- `GET /api/v1/jobs/{job_id}`: consulta status e resultado;
-- `POST /api/v1/jobs/{job_id}/cancel`: solicita cancelamento;
-- `GET /api/v1/jobs/{job_id}/files/{filename}`: baixa um artefato permitido.
+- `GET /`, `GET /changelog`, `GET /health`, `GET /docs`, `GET /redoc`
+- `POST /api/v1/jobs` (`force` optional — skip registry / restart checkpoint)
+- `GET /api/v1/jobs/{job_id}`
+- `POST /api/v1/jobs/{job_id}/cancel`
+- `GET /api/v1/jobs/{job_id}/files/{filename}`
 
-Quando `MEDIA_HUB_API_KEY` estiver definido, envie o header `X-API-Key` (ou
-`Authorization: Bearer <key>`). A UI same-origin usa cookie HttpOnly automaticamente.
-
-Exemplo:
+With `MEDIA_HUB_API_KEY`, send `X-API-Key` (or `Authorization: Bearer <key>`).
+Same-origin UI uses an HttpOnly cookie.
 
 ```bash
 curl -X POST http://localhost:8010/api/v1/jobs \
   -H 'Content-Type: application/json' \
-  -H 'X-API-Key: troque-esta-chave' \
+  -H 'X-API-Key: change-me' \
   -d '{"url":"https://www.youtube.com/watch?v=VIDEO_ID","model":"base","language":"autodetect"}'
 ```
 
-Breaking changes de contrato usam novo path (`/api/v2`) — ver [ADR-017](docs/DECISIONS.md).
+Breaking API changes use a new path (`/api/v2`) — [ADR-017](docs/DECISIONS.md).
 
-## Testes
-
-Os testes unitários não acessam a internet nem carregam modelos Whisper.
+## Tests
 
 ```bash
 pytest
 python -m compileall app backend bff frontend
 ```
 
-Para lint e segurança (mesmo conjunto do CI):
+Lint / security (same as CI):
 
 ```bash
 python -m pip install -r requirements-dev.txt
@@ -126,69 +167,56 @@ bandit -r app backend bff -ll -c pyproject.toml
 pip-audit
 ```
 
-O pipeline GitHub Actions (`.github/workflows/ci.yml`) executa lint, Bandit,
-`pip-audit`, Dependency Review (em PRs) e testes em Python 3.11/3.12.
+## Generated files
 
-## Arquivos gerados
+Per job: `output/{job_id}/` (mirror) and stable cache under
+`output/by-content/{content_hash}/`:
 
-Cada job usa `output/{job_id}/` e pode produzir:
+- `audio.mp3`, `transcript.txt`, `transcript.srt`, `metadata.json`
 
-- `audio.mp3`;
-- `transcript.txt`;
-- `transcript.srt`;
-- `metadata.json`.
+Dedup / resume: `registry.jsonl` (gitignored) keyed by
+`SHA256(canonical YouTube URL)`.  
+Logs: `logs/media-hub-YYYY-MM-DD.log` + monthly `logs/archive/yyyy-mm.tar.gz`
+(30-day retention).
 
-Deduplicação: `registry.jsonl` na raiz do projeto (gitignored).  
-Logs: `logs/media-hub-YYYY-MM-DD.log` e arquivos mensais em `logs/archive/yyyy-mm.tar.gz`
-(retenção de 30 dias; formato estilo Java no console e no disco).
+## Known limitations
 
-## Limitações conhecidas
-
-- jobs existem somente em memória e são perdidos ao reiniciar a aplicação;
-- execute exatamente um processo Uvicorn; múltiplos workers não compartilham jobs;
-- arquivos antigos em `output/` não são limpos automaticamente;
-- o processamento concorre pelos recursos locais e não possui fila ou limite;
-- modelos são baixados pelo `faster-whisper` na primeira utilização;
-- vídeos indisponíveis, privados, com restrições ou alterações do YouTube podem falhar;
-- somente vídeos individuais do YouTube são aceitos; playlists estão fora do escopo;
-- a qualidade e a velocidade variam conforme áudio, idioma, CPU e modelo;
-- com API Key ativa, o cookie HttpOnly da UI é adequado ao uso local single-tenant;
-- cancelamento interrompe entre etapas do pipeline (não mata FFmpeg/Whisper no meio da chamada).
+- jobs live in memory only (lost on restart);
+- single Uvicorn process; workers do not share job state;
+- `output/` is not auto-cleaned;
+- no queue / concurrency limits;
+- Whisper models download on first use;
+- private / restricted / unavailable videos may fail;
+- single YouTube videos only (no playlists yet);
+- cancel stops between pipeline steps (does not kill mid FFmpeg/Whisper call).
 
 ## Troubleshooting
 
-- **FFmpeg não encontrado:** instale-o e confirme `ffmpeg -version`.
-- **Modelo demora na primeira execução:** aguarde o download inicial e verifique
-  conexão e espaço em disco.
-- **Vídeo não processa:** confirme que a URL é pública, individual e acessível sem
-  login. Atualizações do `yt-dlp` podem ser necessárias quando o YouTube muda.
-- **Job desapareceu:** reiniciar o Uvicorn limpa o estado em memória; crie novo job.
-- **Processamento muito lento:** use o modelo `tiny`; `small` exige mais CPU e memória.
-- **401 na API:** defina/envie `MEDIA_HUB_API_KEY` ou deixe a variável vazia no `.env`
-  para modo aberto local.
+- **FFmpeg missing:** install and run `ffmpeg -version`.
+- **Slow first run:** model download — check network and disk.
+- **Job fails:** URL must be public and login-free; update `yt-dlp` if YouTube changes.
+- **Job vanished:** restart clears in-memory jobs; submit again (registry may resume).
+- **401:** set/send `MEDIA_HUB_API_KEY` or leave it empty for open local mode.
 
-## Contribuindo
+## Contributing
 
-Veja [CONTRIBUTING.md](CONTRIBUTING.md) e o [Código de Conduta](CODE_OF_CONDUCT.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md),
+and [docs/ADAPTERS.md](docs/ADAPTERS.md).
 
-## Licença
+## License
 
-Distribuído sob a [PolyForm Noncommercial License 1.0.0](LICENSE).
+[Apache License 2.0](LICENSE).
 
-- Uso, estudo e contribuição **não comerciais** são permitidos.
-- **Uso comercial** exige licença/acordo separado com a Ideias Factory.
-- Isto é software **source-available**, não OSI “Open Source” (a restrição
-  comercial é intencional).
+- Use, modification, and redistribution (including commercial) under Apache-2.0.
+- Contributions are accepted under the same license.
+- [DISCLAIMER.md](DISCLAIMER.md) still governs **third-party content** (copyright,
+  illegal use, DRM).
 
-## Uso responsável
+## Responsible use
 
-Utilize somente conteúdo próprio, autorizado ou cujo processamento seja permitido
-pela legislação e pelos termos aplicáveis. É proibido qualquer uso ilegal —
-incluindo exploração ou abuso sexual de crianças e adolescentes e demais crimes
-listados no disclaimer. O projeto não contorna DRM, autenticação, restrições
-territoriais ou outros controles de acesso e não usa cookies ou credenciais de
-plataformas de mídia.
+Process only content you own, are authorized to process, or that is otherwise
+lawful. Illegal use is prohibited — including child sexual exploitation and other
+crimes listed in the disclaimer. This project does not circumvent DRM, auth, geo
+blocks, or other access controls and does not use platform cookies/credentials.
 
-Leia a [Isenção de Responsabilidade](DISCLAIMER.md) (direitos autorais, usos
-ilegais proibidos e limitação de responsabilidade) e a
-[Política de Privacidade](PRIVACY.md) (como tratamos dados na instância local).
+Read the [Disclaimer](DISCLAIMER.md) and [Privacy Policy](PRIVACY.md).

@@ -894,11 +894,10 @@ duplicar o conteúdo dos épicos.
 
 ## EPIC-038 — Comunidade, visibilidade e engajamento open source
 
-**Status:** Planejado (após EPIC-035–037 na v0.2.x)  
-**Release:** v0.2.x (fechamento da faixa) → prepara v0.3  
-**Depende de:** EPIC-032, EPIC-033; preferencialmente após EPIC-036 (demo
-“one command”) e EPIC-037 (docs operacionais)  
-**ADRs:** 018 (revisão), 025
+**Status:** Em andamento (v0.2.1 — tasks 01, 02, 03, 05; restante follow-up)  
+**Release:** v0.2.1 (fatia) → follow-up v0.2.x  
+**Depende de:** EPIC-032, EPIC-033; PO reautorizou fatia antes de EPIC-035–037  
+**ADRs:** 018 (revisão → Apache-2.0), 025
 
 ### Objetivo
 
@@ -976,3 +975,39 @@ EPIC-035 → EPIC-036 → EPIC-037 → EPIC-038 → (v0.3 adapters)
 
 Docker + docs (036/037) alimentam a demo “one command” usada em TASK-038-02/07.
 Issues de adapters (038-04) preparam contribuição na v0.3 sem antecipar código.
+
+---
+
+## EPIC-039 — Identidade por URL + checkpoint/retomada de jobs
+
+**Status:** Concluído (v0.2.1)  
+**Release:** v0.2.1  
+**Depende de:** EPIC-003  
+**ADRs:** 010 (revisão), 026
+
+### Objetivo
+
+Identificar conteúdos pelo hash da URL canônica e retomar pipelines interrompidos
+na segunda execução da mesma URL, sem recomeçar do zero.
+
+### Inclui
+
+- `content_hash = SHA256(canonical_youtube_url)`
+- Checkpoint em `registry.jsonl` (`status`, `last_step`) após cada etapa
+- Artefatos estáveis em `output/by-content/{content_hash}/`
+- Retomada automática sem `force`; `force=true` reinicia
+
+### Critérios de aceite
+
+- URLs equivalentes (`youtu.be` / `watch?v=`) compartilham o mesmo hash
+- Job parcial (ex.: áudio baixado) → nova execução pula o download
+- `force=true` limpa o diretório de conteúdo e reprocessa
+- Testes cobrindo hash estável, cache ready e resume
+- ADR-026 Accepted
+
+### Fora de escopo
+
+- Persistência de jobs em Redis/DB (EPIC-015)
+- Kill cooperativo de FFmpeg/Whisper no meio da syscall
+- Limpeza automática de `by-content/`
+

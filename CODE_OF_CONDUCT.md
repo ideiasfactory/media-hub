@@ -18,7 +18,8 @@ participam do Media Hub — contribuidores, mantenedores e usuários.
 - Publicar informação privada de outros sem permissão.
 - Pressionar por funcionalidades que contornem DRM, autenticação ou restrições
   de acesso de plataformas.
-- Uso do projeto de forma incompatível com a licença PolyForm Noncommercial.
+- Uso do projeto de forma incompatível com a licença Apache-2.0 ou com o
+  [DISCLAIMER.md](DISCLAIMER.md) (conteúdo / usos ilegais).
 - Qualquer uso ilegal do software ou do repositório, em especial exploração ou
   abuso sexual de crianças e adolescentes (CSAM/CSEM) e demais condutas
   descritas em [DISCLAIMER.md](DISCLAIMER.md).
