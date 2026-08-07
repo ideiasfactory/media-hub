@@ -37,19 +37,20 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-021](#adr-021--checklist-obrigatório-ao-fechar-uma-versão) | Checklist obrigatório ao fechar uma versão | Accepted |
 | [ADR-022](#adr-022--logging-local-estilo-java-com-retenção-e-arquivo-mensal) | Logging local estilo Java com retenção e arquivo mensal | Accepted |
 | [ADR-023](#adr-023--validação-contínua-de-vulnerabilidades) | Validação contínua de vulnerabilidades | Proposed |
-| [ADR-024](#adr-024--deploy-docker-com-volumes-no-host) | Deploy Docker com volumes no host | Proposed |
+| [ADR-024](#adr-024--deploy-docker-com-volumes-no-host) | Deploy Docker com volumes no host | Accepted |
 | [ADR-025](#adr-025--comunidade-visibilidade-e-engajamento) | Comunidade, visibilidade e engajamento | Accepted |
 | [ADR-026](#adr-026--identidade-por-url-canônica-e-checkpoint-de-jobs) | Identidade por URL canônica e checkpoint de jobs | Accepted |
-| [ADR-027](#adr-027--cicd-ihl-build-once-promote) | CI/CD IHL: build once, promote | Proposed |
-| [ADR-028](#adr-028--semver-rc-e-prereleases-de-artefato) | SemVer + RC/dev prereleases de artefato | Proposed |
-| [ADR-029](#adr-029--ambiente-como-desired-state) | Ambiente como desired state (sem env branches) | Proposed |
-| [ADR-030](#adr-030--ghcr-e-identidade-por-digest) | GHCR e identidade por digest | Proposed |
-| [ADR-031](#adr-031--homologação-em-mac-srv-01) | Homologação em mac-srv-01 (runner self-hosted) | Proposed |
-| [ADR-032](#adr-032--dev-compose-prod-adiado-gitops-ready) | DEV Compose; PROD adiado; GitOps-ready | Proposed |
+| [ADR-027](#adr-027--cicd-ihl-build-once-promote) | CI/CD IHL: build once, promote | Accepted (amended by ADR-033) |
+| [ADR-028](#adr-028--semver-rc-e-prereleases-de-artefato) | SemVer + RC/dev prereleases de artefato | Accepted |
+| [ADR-029](#adr-029--ambiente-como-desired-state) | Ambiente como desired state (sem env branches) | Accepted (amended by ADR-033) |
+| [ADR-030](#adr-030--ghcr-e-identidade-por-digest) | GHCR e identidade por digest | Accepted |
+| [ADR-031](#adr-031--homologação-em-mac-srv-01) | Homologação IHL (runner self-hosted) | Accepted (amended by ADR-033) |
+| [ADR-032](#adr-032--dev-compose-prod-adiado-gitops-ready) | DEV Compose; PROD adiado; GitOps-ready | Accepted (amended by ADR-033) |
 | [ADR-033](#adr-033--artefato-público-promote-privado-media-hub-ops) | Artefato público / promote privado (`media-hub-ops`) | Accepted |
 
 Documentação operacional (comunidade): [CICD.md](CICD.md).  
-Open core / multi-repo: [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md).
+Open core / multi-repo: [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
+[REPO_SEGMENTATION.md](REPO_SEGMENTATION.md).
 
 ---
 
@@ -706,7 +707,7 @@ sem transformar o MVP local em programa de pentest.
 
 ## ADR-024 — Deploy Docker com volumes no host
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-036  
 **Release:** v0.2.x
@@ -731,6 +732,12 @@ ciclo de vida do container.
 4. Jobs em memória permanecem voláteis no restart do container; só disco
    persistido via volumes.
 5. Sem Kubernetes, multi-réplica ou workers nesta ADR (EPIC-015+).
+
+### Nota (homolog IHL)
+
+Homolog IHL consome a **mesma** imagem GHCR e o **mesmo** modelo de volumes.
+Os manifests de ambiente (`deploy/<env>/`) vivem no repo privado
+`media-hub-ops` (ADR-033 / EPIC-041), não neste open source.
 
 ### Consequências
 
@@ -816,7 +823,7 @@ para deduplicar pelo endereço canônico do vídeo.
 
 ## ADR-027 — CI/CD IHL: build once, promote
 
-**Status:** Proposed  
+**Status:** Accepted (amended by ADR-033 — localização do promote)  
 **Data:** 2026-08-06  
 **Épico:** EPIC-040 (com EPIC-036)  
 **Release:** v0.2.x  
@@ -849,7 +856,7 @@ com o ciclo de produto.
 
 ## ADR-028 — SemVer + RC/dev prereleases de artefato
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-040  
 **Release:** v0.2.x  
@@ -881,7 +888,7 @@ explícita para **imagens/artefatos** promovíveis (RC vs estável vs dev).
 
 ## ADR-029 — Ambiente como desired state
 
-**Status:** Proposed  
+**Status:** Accepted (amended by ADR-033 — localização dos manifests IHL)  
 **Data:** 2026-08-06  
 **Épico:** EPIC-040  
 **Release:** v0.2.x  
@@ -895,11 +902,14 @@ hotfixes e quebram a premissa de promote do mesmo artefato.
 ### Decisão
 
 1. **Não** criar branches de longa duração por ambiente.
-2. Desired state versionado sob `deploy/<ambiente>/` (Compose + `versions.yaml`).
-3. GitHub Environments (`homolog` agora; `production` futuro) controlam secrets,
-   proteção e auditoria de deploy — não o conteúdo do código da app.
+2. **DEV:** Compose na raiz deste repo open (`docker-compose.yml`).
+   **Homolog/prod (desired state):** manifests sob `deploy/<ambiente>/` no
+   repo privado `ideiasfactory/media-hub-ops` (Compose + `versions.yaml`).
+3. GitHub Environments (`homolog` agora; `production` futuro) no **ops**
+   controlam secrets, proteção e auditoria de deploy — não o conteúdo do
+   código da app.
 4. Mudança de versão em homolog = atualizar pin (tag/digest) + redeploy, via
-   workflow ou PR no manifest.
+   workflow ou PR no manifest (ops).
 
 ### Consequências
 
@@ -912,7 +922,7 @@ hotfixes e quebram a premissa de promote do mesmo artefato.
 
 ## ADR-030 — GHCR e identidade por digest
 
-**Status:** Proposed  
+**Status:** Accepted  
 **Data:** 2026-08-06  
 **Épico:** EPIC-040  
 **Release:** v0.2.x  
@@ -941,9 +951,9 @@ para promote.
 
 ---
 
-## ADR-031 — Homologação em mac-srv-01
+## ADR-031 — Homologação IHL (runner self-hosted)
 
-**Status:** Proposed  
+**Status:** Accepted (amended by ADR-033 — localização do CD / runbook)  
 **Data:** 2026-08-06  
 **Épico:** EPIC-040  
 **Release:** v0.2.x  
@@ -951,42 +961,34 @@ para promote.
 
 ### Contexto
 
-A homologação da Ideias Factory para este produto roda no host **mac-srv-01**,
-com GitHub Actions self-hosted.
+A homologação IHL da Ideias Factory para este produto usa **GitHub Actions
+self-hosted** e um GitHub Environment dedicado. Topologia de host, labels,
+rede e secrets **não** são documentação pública.
 
 ### Decisão
 
-1. Deploy homolog **somente** via workflow com
-   `runs-on: [self-hosted, mac, homolog]` e `environment: homolog`.
-2. Fatos do runner (configurados na org/host, não no YAML além das labels):
-   - nome: `mac-srv-01`
-   - labels: `mac`, `homolog` (+ `self-hosted`)
-   - runner group: `self-hosted-runner-ideias`
-   - acesso LAN preferencial: USB Ethernet **`192.168.15.23`** (não o IP Wi‑Fi
-     `.21` para clientes da rede)
-   - HTTP homolog: porta **8010** → `http://mac-srv-01:8010/health`
-3. Pré-requisitos no host: Docker/Compose operacional; diretório de dados com
-   volumes (ADR-024); acesso de pull ao GHCR; host acordado (evitar idle sleep
-   agressivo — `caffeinate` / `pmset`).
-4. Smoke mínimo: `GET /health` após `compose up`.
-5. **Localização (ADR-033):** o workflow e manifests de homolog residem no
-   repo privado `ideiasfactory/media-hub-ops`, não no open source. Topologia
-   detalhada do host fica no runbook do ops.
-5. Segredos (ex.: `MEDIA_HUB_API_KEY`) no GitHub Environment `homolog` ou no
-   `.env` do host — nunca no Git.
+1. Deploy homolog **somente** via workflow self-hosted com Environment
+   `homolog` (labels e proteção configurados na org/host).
+2. Pré-requisitos no host de homolog: Docker/Compose operacional; diretório de
+   dados com volumes (ADR-024); acesso de pull ao GHCR; host acordado para
+   disponibilidade do runner.
+3. Smoke mínimo: `GET /health` após `compose up`.
+4. **Localização (ADR-033):** workflow, manifests e runbook IHL residem no
+   repo privado `ideiasfactory/media-hub-ops`, não neste open source.
+5. Segredos (ex.: `MEDIA_HUB_API_KEY`) no GitHub Environment `homolog` (ops)
+   ou no `.env` do host — nunca no Git.
 
 ### Consequências
 
-- Se o runner estiver offline, o CD fica queued (runbook em CICD.md).
+- Se o runner estiver offline, o CD fica queued (runbook no **media-hub-ops**).
 - Homolog e DEV compartilham o modelo de volumes do EPIC-036.
-- Resolução DNS/`/etc/hosts` errada (`.21`) parece “serviço fora” mesmo com
-  container healthy no USB LAN.
+- Detalhe de rede/DNS/host fica só no runbook privado.
 
 ---
 
 ## ADR-032 — DEV Compose; PROD adiado; GitOps-ready
 
-**Status:** Proposed  
+**Status:** Accepted (amended by ADR-033 — localização do promote IHL)  
 **Data:** 2026-08-06  
 **Épico:** EPIC-040 (com EPIC-036)  
 **Release:** v0.2.x  
@@ -1011,8 +1013,10 @@ agora, mantendo a arquitetura preparada para GitOps futuro (K3s).
 
 ### Consequências
 
-- EPIC-036 entrega a base de imagem/volumes; EPIC-040 entrega promote/CD
-  (baseline); a **localização** do promote IHL passa a ADR-033 / EPIC-041.
+- **EPIC-040** = publish GHCR + princípios (build once / digest / desired
+  state / SemVer RC). **Promote IHL** = **EPIC-041** / repo
+  `media-hub-ops` (ADR-033).
+- EPIC-036 entrega a base de imagem/volumes consumida por ambos.
 - Evita overengineering (sem K8s na v0.2.x).
 
 ---
@@ -1021,14 +1025,15 @@ agora, mantendo a arquitetura preparada para GitOps futuro (K3s).
 
 **Status:** Accepted  
 **Data:** 2026-08-07  
-**Épico:** EPIC-041 (revisa localização do promote de ADR-027 / 029 / 031)  
+**Épico:** EPIC-041 (amenda localização do promote em ADR-027 / 029 / 031 / 032)  
 **Release:** v0.2.x  
-**Doc:** [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md)
+**Doc:** [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
+[REPO_SEGMENTATION.md](REPO_SEGMENTATION.md)
 
 ### Contexto
 
 O repositório público misturava **publicação de artefato OSS** (CI, imagem
-GHCR) com **CD e topologia IHL** (runner `mac-srv-01`, Environment `homolog`,
+GHCR) com **CD e topologia IHL** (runner self-hosted, Environment `homolog`,
 desired state de homolog). Isso acopla ops interna a contribuidores externos e
 dificulta um futuro produto comercial (SaaS) sem fork divergente do core
 Apache-2.0.
@@ -1038,15 +1043,17 @@ Apache-2.0.
 1. **Artefato público, promote privado** — `ideiasfactory/media-hub` publica
    a imagem imutável em GHCR; o promote para homolog (e futuros ambientes IHL)
    vive no repo privado `ideiasfactory/media-hub-ops`.
-2. **Dependência unidirecional** — ops (e futuro cloud) → core. O core **não**
-   depende de ops/SaaS.
+2. **Dependência unidirecional** — ops e cloud → core. O core **não** depende
+   de ops/SaaS.
 3. **Criar `media-hub-ops`** com `deploy-homolog.yml`, `deploy/homolog/`,
    runbook de runner/Environment/secrets. A imagem continua
    `ghcr.io/ideiasfactory/media-hub` (mesmo digest, ADR-027).
 4. **Sanitizar docs públicos** — `CICD.md` descreve self-host + publish GHCR;
    detalhe de host IHL fica no ops. Ver [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md).
-5. **Não criar** `media-hub-cloud` nesta decisão; reavaliar quando houver
-   multi-tenant/billing.
+5. **SaaS:** o repo privado `ideiasfactory/media-hub-cloud` **pode** existir
+   como **skeleton** (docs/ADR locais; sem fork do código open). Não contém
+   ops IHL. Implementação multi-tenant/billing fica para épicos futuros
+   (EPIC-023 / EPIC-024, tipo B/C, repo=`cloud`).
 
 ### Consequências
 
@@ -1055,7 +1062,8 @@ Apache-2.0.
 - EPIC-040 permanece a baseline de princípios (build once / digest / desired
   state); EPIC-041 só muda *onde* o CD IHL vive.
 - Contribuições OSS não precisam de labels/runner IHL no actionlint do open.
-- Produto multi-repo: classificar épicos A/B/C em [EPICS.md](EPICS.md).
+- Produto multi-repo (core / ops / cloud): classificar épicos A/B/C em
+  [EPICS.md](EPICS.md); topologia em [REPO_SEGMENTATION.md](REPO_SEGMENTATION.md).
 
 ---
 

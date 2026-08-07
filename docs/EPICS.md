@@ -11,20 +11,25 @@ Legenda de status: **Em andamento** · **Planejado** · **Concluído** · **Bloq
 Usar nos épicos que tocam mais de um repositório do produto (core OSS / ops /
 cloud). O monorepo `media-hub` continua a ser o núcleo; repos adicionais
 **consomem** o core (dependência unidirecional). Ver
-[OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) · [ADR-033](DECISIONS.md#adr-033--artefato-público-promote-privado-media-hub-ops).
+[OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
+[REPO_SEGMENTATION.md](REPO_SEGMENTATION.md) ·
+[ADR-033](DECISIONS.md#adr-033--artefato-público-promote-privado-media-hub-ops).
 
 | Campo | Valores |
 |-------|---------|
 | **Repos** | `core` · `ops` · `cloud` · `core+ops` · `core+cloud` |
 | **Tipo** | **A** só core · **B** só ops/cloud · **C** cross-repo |
 | **Repo primário** | ex. `ideiasfactory/media-hub` |
-| **Repo secundário** | ex. `ideiasfactory/media-hub-ops` (se houver) |
+| **Repo secundário** | ex. `ideiasfactory/media-hub-ops` ou `media-hub-cloud` |
 | **Contrato** | API / imagem / env / digest — o que o secundário consome |
 | **Ordem de entrega** | 1) … 2) … (sempre core → consumidor no tipo C) |
 
 **Tipo A** — 1 PR no core; ops só bump de pin se quiser homologar.  
 **Tipo B** — 1 PR no ops/cloud; pin de artefato core já existente.  
 **Tipo C** — contrato no core (compatível) → release/tag/digest → PR no consumidor.
+
+Marcação de repos: **core** = `media-hub` · **ops** = `media-hub-ops` ·
+**cloud** = `media-hub-cloud`.
 
 ---
 
@@ -465,7 +470,9 @@ Prometheus/OpenTelemetry, dashboards, alertas, correlação distribuída — v0.
 **Status:** Planejado  
 **Release:** v0.7  
 **Depende de:** EPIC-026  
-**ADRs:** 015 (evolução)
+**ADRs:** 015 (evolução)  
+**Repo:** `cloud` (`ideiasfactory/media-hub-cloud`)  
+**Tipo:** B/C (camada comercial; contrato auth pode exigir fatia no core)
 
 ### Escopo
 
@@ -476,7 +483,8 @@ Evoluir a proteção da API Key simples (EPIC-026) para:
 - OAuth
 
 Necessário antes de API pública / multi-tenant. A API Key via `.env` permanece
-como modo local/single-tenant até este épico.
+como modo local/single-tenant até este épico. Implementação alvo no repo
+**cloud**; índice de produto permanece neste open.
 
 ---
 
@@ -484,11 +492,13 @@ como modo local/single-tenant até este épico.
 
 **Status:** Planejado  
 **Release:** v0.7  
-**Depende de:** EPIC-023
+**Depende de:** EPIC-023  
+**Repo:** `cloud` (`ideiasfactory/media-hub-cloud`)  
+**Tipo:** B (camada comercial)
 
 ### Escopo
 
-Quotas, consumo e planos.
+Quotas, consumo e planos. Implementação alvo no repo **cloud**.
 
 ---
 
@@ -1071,7 +1081,7 @@ homolog** passaram para o repo privado `ideiasfactory/media-hub-ops`
 | Ambiente | Alvo | Status |
 |----------|------|--------|
 | DEV | máquina local + `docker compose` | Ativo (este repo) |
-| HOMOLOG | `mac-srv-01` via `media-hub-ops` | CD no ops privado |
+| HOMOLOG | infra IHL via `media-hub-ops` | CD no ops privado |
 | PROD | futuro | Documentado / não ativo |
 
 ### Relação com EPIC-036
@@ -1115,19 +1125,21 @@ Homolog **não** funciona sem packaging Docker (036).
 
 ## EPIC-041 — Separação ops IHL do repositório open (media-hub-ops)
 
-**Status:** Em andamento  
+**Status:** Concluído (migração docs/CD; follow-ups operacionais no ops)  
 **Release:** v0.2.x (ajuste de fronteira pós-EPIC-040)  
 **Depende de:** EPIC-040 (baseline CD existente)  
-**Repos:** core+ops  
+**Repos:** core+ops (+ ponteiro cloud)  
 **Tipo:** C (extrai ops do monorepo open → repo privado; core continua a
 publicar a imagem)  
-**Repo primário:** ideiasfactory/media-hub  
-**Repo secundário:** ideiasfactory/media-hub-ops (privado)  
+**Repo primário:** ideiasfactory/media-hub (`core`)  
+**Repo secundário:** ideiasfactory/media-hub-ops (privado, `ops`)  
 **Contrato:** imagem GHCR `ghcr.io/ideiasfactory/media-hub@sha256:…` (ou tag RC)  
-**Ordem:** 1) criar ops + espelhar deploy 2) validar promote no mac-srv-01
-3) remover CD/manifests IHL do open 4) docs/ADR  
-**ADRs:** 033; revê 027, 029, 031 no que toca *localização* do promote  
-**Doc:** [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) · [CICD.md](CICD.md)
+**Ordem:** 1) criar ops + espelhar deploy 2) remover CD/manifests IHL do open
+3) docs/ADR sanitizados 4) *(humano)* re-registar runner / Environment e
+validar promote E2E  
+**ADRs:** 033; amenda 027, 029, 031, 032 na *localização* do promote  
+**Doc:** [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
+[REPO_SEGMENTATION.md](REPO_SEGMENTATION.md) · [CICD.md](CICD.md)
 
 ### Objetivo
 
@@ -1135,20 +1147,16 @@ Separar **publicação de artefato OSS** de **deploy em infra IHL**, alinhando o
 repo público ao modelo open core e preparando o produto multi-repo sem fork
 divergente.
 
-### Inclui
+### Inclui (entregue)
 
-- Documento `docs/OPEN_CORE_AND_OPS.md` (discussão, conclusões, observações)
-- ADR-033: artefato público / promote privado; dependência unidirecional
+- Documento `docs/OPEN_CORE_AND_OPS.md` + [REPO_SEGMENTATION.md](REPO_SEGMENTATION.md)
+- ADR-033: artefato público / promote privado; dependência unidirecional;
+  skeleton cloud permitido
 - Template de classificação multi-repo (A/B/C) em `EPICS.md`
-- Criar repo privado `media-hub-ops` com:
-  - workflow deploy homolog (equivalente ao anterior no open)
-  - `deploy/homolog/` (compose + versions.yaml + .env.example)
-  - README/runbook IHL (runner, Environment `homolog`, secrets)
-- Reapontar runner self-hosted / Environment para o repo privado (passo manual)
-- Remover do open: `.github/workflows/deploy-homolog.yml`, `deploy/homolog/`,
-  labels actionlint só de homolog
-- Atualizar `CICD.md`, `deploy/README.md`, README, ROADMAP, CHANGELOG, AGENTS
-- Manter no open: `ci.yml`, `build-publish.yml`, Dockerfile, Compose DEV
+- Repo privado `media-hub-ops` com workflow, `deploy/homolog/`, runbook IHL
+- Removido do open: `.github/workflows/deploy-homolog.yml`, `deploy/homolog/`,
+  labels actionlint só de homolog; ADRs públicos sem topologia IHL
+- Mantido no open: `ci.yml`, `build-publish.yml`, Dockerfile, Compose DEV
 
 ### Critérios de aceite
 
@@ -1160,13 +1168,20 @@ divergente.
 - `pytest` + `compileall` no open (sem regressão de app)
 - Sem segredos no Git (open ou ops)
 
+### Follow-ups operacionais (humano — ops)
+
+- Re-registar runner / Environment `homolog` no `media-hub-ops`
+- Permissões GHCR package read para o ops
+- Validar promote E2E (smoke `/health`)
+
 ### Fora de escopo
 
-- Criar `media-hub-cloud` / SaaS multi-tenant / billing
+- Implementar SaaS multi-tenant / billing (só skeleton `media-hub-cloud`)
 - Pipeline de produção
 - Mudança de licença do core
 - Alterar contrato `/api/v1` da aplicação
 - Adapters sociais (v0.3)
+- Renomear `media-hub` para `-oss` / `-core`
 
 ---
 

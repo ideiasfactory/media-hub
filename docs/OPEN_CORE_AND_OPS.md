@@ -2,7 +2,8 @@
 
 **Status:** Accepted (EPIC-041 + ADR-033)  
 **Data:** 2026-08-07  
-**Relacionado:** [CICD.md](CICD.md) · [EPIC-040](EPICS.md#epic-040--cicd-ihl-homolog-mac-srv-01) ·
+**Relacionado:** [CICD.md](CICD.md) · [REPO_SEGMENTATION.md](REPO_SEGMENTATION.md) ·
+[EPIC-040](EPICS.md#epic-040--cicd-ihl-homolog-mac-srv-01) ·
 [EPIC-041](EPICS.md#epic-041--separação-ops-ihl-do-repositório-open-media-hub-ops) ·
 ADR-027–032 · [ADR-033](DECISIONS.md#adr-033--artefato-público-promote-privado-media-hub-ops)
 
@@ -13,7 +14,7 @@ Discussão de produto sobre:
 1. Manter o Media Hub **open source** (Apache-2.0) e, no futuro, um **SaaS
    comercial** sem fork divergente permanente.
 2. Preocupação: o repo público incluía **CD de Release Candidates para homolog
-   IHL** (`mac-srv-01`), misturando artefato open com ops interna.
+   IHL**, misturando artefato open com ops interna.
 3. Como continuar o modelo de maturidade (épicos, ADRs, monorepo modular)
    quando o produto passar a ter **mais de um repositório**.
 
@@ -37,7 +38,7 @@ Discussão de produto sobre:
 | CI (`ci.yml`) | `deploy-homolog.yml` |
 | `Dockerfile` + Compose DEV (self-host) | `deploy/homolog/` |
 | `build-publish.yml` → GHCR | Environment `homolog`, secrets, runner labels |
-| Docs de self-host / SemVer | Runbook IHL (`mac-srv-01`, paths no host) |
+| Docs de self-host / SemVer | Runbook IHL (host, paths, rede) |
 
 Regra: **artefato público, promote privado**. Mantém “build once, promote same
 digest” (ADR-027); só muda *onde* vive o promote.
@@ -45,10 +46,11 @@ digest” (ADR-027); só muda *onde* vive o promote.
 ### Multi-repo sem abandonar monorepo
 
 - O **produto open** continua monorepo (`frontend` / `bff` / `backend` / `app`).
-- Segundo repo inicial = **ops fino** (manifests + CD), não SaaS completo.
-- SaaS (`media-hub-cloud`) só quando houver domínio comercial real; até lá
-  ops ≠ SaaS.
-- Um **backlog/épicos únicos**; código e CI por fronteira.
+- Segundo repo = **ops fino** (manifests + CD), não SaaS.
+- Terceiro repo = **`media-hub-cloud`** (privado): skeleton da camada comercial;
+  depende do core (imagem/API); **não** contém ops IHL. Ver
+  [REPO_SEGMENTATION.md](REPO_SEGMENTATION.md).
+- Um **backlog/épicos únicos** no open; código e CI por fronteira.
 - Classificar mudanças: **A** só core · **B** só ops/cloud · **C** cross-repo
   (contrato → release core → consume). Ver template em [EPICS.md](EPICS.md).
 
@@ -58,8 +60,8 @@ digest” (ADR-027); só muda *onde* vive o promote.
   ser público é o pipeline e a topologia interna.
 - Evitar: forks espelhados, submodule em `main` sem pin, duplicar lógica do
   core no cloud, épicos cloud que assumem API ainda não publicada.
-- EPIC-040 entrega a baseline CD *no* repo open; EPIC-041 **re-localiza** essa
-  fatia de CD para o repo privado sem descartar o princípio build-once.
+- EPIC-040 entrega publish GHCR + princípios; EPIC-041 **re-localiza** o
+  promote IHL para o repo privado sem descartar o princípio build-once.
 - Detalhe IHL em workflows/`CICD.md` públicos era ruído para contribuidores
   e acoplamento ops↔produto.
 
@@ -70,8 +72,11 @@ digest” (ADR-027); só muda *onde* vive o promote.
 3. No público: manter CI + build/publish GHCR + Compose DEV; sanitizar
    `CICD.md` (comunidade = self-host + publish; CD IHL = privado).
 4. Template multi-repo (tipos A/B/C) em `EPICS.md`.
-5. Não criar ainda repo SaaS; reavaliar quando houver multi-tenant/billing.
+5. Repo SaaS `ideiasfactory/media-hub-cloud` **pode** existir como skeleton
+   (docs; sem fork do open). Implementação multi-tenant/billing = épicos
+   futuros (repo=`cloud`).
 
-## Próximo passo
+## Topologia e DAG
 
-Executar e fechar **EPIC-041** (este documento + migração + PRs).
+Visão dos 3 repos e tarefas de segmentação:
+[REPO_SEGMENTATION.md](REPO_SEGMENTATION.md).

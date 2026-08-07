@@ -27,7 +27,8 @@
     foi reautorizada.)
 13. CD / desired state de homolog IHL **não** vive no repo público — ver
     `ideiasfactory/media-hub-ops` e [docs/OPEN_CORE_AND_OPS.md](docs/OPEN_CORE_AND_OPS.md)
-    (ADR-033).
+    (ADR-033). Topologia 3 repos: [docs/REPO_SEGMENTATION.md](docs/REPO_SEGMENTATION.md).
+    SaaS comercial (quando existir código) vive em `media-hub-cloud`, não no ops.
 
 ## Arquitetura inicial
 
