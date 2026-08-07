@@ -93,6 +93,9 @@ jobs:
   dependency-review:
     name: Supply chain (dependency review)
     if: github.event_name == 'pull_request'
+    # Soft-fail until Dependency graph is enabled in repo/org settings
+    # (Settings → Code security → Dependency graph). pip-audit remains required.
+    continue-on-error: true
     runs-on: ubuntu-latest
     permissions:
       contents: read

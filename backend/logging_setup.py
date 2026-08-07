@@ -21,9 +21,7 @@ class JavaStyleFormatter(logging.Formatter):
         created = datetime.fromtimestamp(record.created)
         timestamp = created.strftime("%Y-%m-%d %H:%M:%S") + f",{int(record.msecs):03d}"
         level = f"{record.levelname:<7}"
-        line = (
-            f"{timestamp} {level} [{record.threadName}] {record.name} - {record.getMessage()}"
-        )
+        line = f"{timestamp} {level} [{record.threadName}] {record.name} - {record.getMessage()}"
         if record.exc_info:
             line = f"{line}\n{self.formatException(record.exc_info)}"
         return line
