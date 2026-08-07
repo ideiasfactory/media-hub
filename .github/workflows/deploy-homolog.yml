@@ -4,8 +4,17 @@ name: Deploy homolog
 # Runner: self-hosted, labels mac + homolog (group self-hosted-runner-ideias).
 # Environment: GitHub Environment `homolog`.
 # PROD is out of scope — do not add a live production deploy here.
+#
+# Note: workflow_dispatch-only files are not listed until present on the default
+# branch. A PR validation job registers the workflow and checks compose config.
 
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "deploy/homolog/**"
+      - ".github/workflows/deploy-homolog.yml"
+      - "Dockerfile"
   workflow_dispatch:
     inputs:
       image_ref:
@@ -21,7 +30,7 @@ on:
         default: false
 
 concurrency:
-  group: deploy-homolog
+  group: deploy-homolog-${{ github.event_name }}-${{ github.ref }}
   cancel-in-progress: false
 
 permissions:
@@ -29,8 +38,25 @@ permissions:
   packages: read
 
 jobs:
+  validate-manifests:
+    name: Validate homolog manifests
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: docker compose config
+        env:
+          MEDIA_HUB_IMAGE_REF: ghcr.io/ideiasfactory/media-hub:sha-placeholder
+        run: |
+          set -euo pipefail
+          docker compose -f deploy/homolog/docker-compose.yml config >/dev/null
+          echo "homolog compose config OK"
+
   deploy:
     name: Deploy to mac-srv-01
+    if: github.event_name == 'workflow_dispatch'
     runs-on: [self-hosted, mac, homolog]
     environment: homolog
     steps:
@@ -76,7 +102,6 @@ jobs:
         run: |
           set -euo pipefail
           echo "Deploying ${MEDIA_HUB_IMAGE_REF}"
-          # Record desired state for operators
           {
             echo "image_repository: ghcr.io/ideiasfactory/media-hub"
             echo "tag: \"manual\""
@@ -90,7 +115,7 @@ jobs:
           docker compose ps
 
       - name: Smoke /health
-        if: ${{ inputs.skip_smoke != true && inputs.skip_smoke != 'true' }}
+        if: ${{ !inputs.skip_smoke }}
         env:
           MEDIA_HUB_PORT: ${{ vars.MEDIA_HUB_PORT || '8010' }}
         run: |

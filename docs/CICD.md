@@ -166,7 +166,16 @@ ou grant ao `GITHUB_TOKEN` do repo).
 - Em orgs: pacotes podem exigir `GITHUB_TOKEN` com acesso a packages habilitado
   nas settings do repo/org.
 
-### Deploy homolog fica enfileirado / não inicia
+### Deploy homolog não aparece em Actions / `gh workflow run` 404
+
+Workflows **somente** `workflow_dispatch` só ficam listados depois de existirem
+na branch default (`main`). Até o merge, o job **Validate homolog manifests**
+roda em PRs que tocam `deploy/homolog/**`. Após merge em `main`, use:
+
+```bash
+gh workflow run deploy-homolog.yml \
+  -f image_ref='ghcr.io/ideiasfactory/media-hub@sha256:…'
+```
 
 - Runner `mac-srv-01` offline ou sem labels `mac` e `homolog`.
 - Confirmar runner group `self-hosted-runner-ideias` e que o repo tem acesso.
