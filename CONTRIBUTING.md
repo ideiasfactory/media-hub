@@ -4,10 +4,24 @@ Obrigado por contribuir. Este guia resume o fluxo esperado para humanos e agente
 
 ## Antes de começar
 
-1. Leia [README.md](README.md), [AGENTS.md](AGENTS.md) e [docs/ROADMAP.md](docs/ROADMAP.md).
-2. Confirme que o trabalho está autorizado por um épico aberto — não expanda escopo.
-3. Use apenas conteúdo público/autorizado; não implemente bypass de DRM, login,
-   cookies de plataforma ou restrições geográficas.
+1. Leia [README.md](README.md) e [AGENTS.md](AGENTS.md).
+2. Alinhe-se à **arquitetura** e ao **roadmap** do produto (obrigatório antes de
+   propor features ou adapters):
+   - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — monorepo `frontend` / `bff` /
+     `backend`, jobs, registry, limites do MVP;
+   - [docs/ROADMAP.md](docs/ROADMAP.md) — releases e prioridade de execução
+     autorizada pelo Product Owner;
+   - [docs/EPICS.md](docs/EPICS.md) — catálogo de épicos (o que está aberto,
+     concluído ou fora de escopo);
+   - [docs/DECISIONS.md](docs/DECISIONS.md) — ADRs (decisões que não devem ser
+     reabertas sem revisão explícita).
+3. Confirme que o trabalho está autorizado por um épico aberto — não expanda
+   escopo além do roadmap vigente.
+4. Use apenas conteúdo público/autorizado; não implemente bypass de DRM, login,
+   cookies de plataforma ou restrições geográficas ([ADR-013](docs/DECISIONS.md)).
+
+Índice completo da documentação: [docs/README.md](docs/README.md).
+Propor novo adapter: [docs/ADAPTERS.md](docs/ADAPTERS.md).
 
 ## Setup local
 
@@ -27,7 +41,8 @@ Opcional: defina `MEDIA_HUB_API_KEY` no `.env` para testar a proteção da API.
 1. Crie uma branch dedicada a partir de `main` (`feature/...` ou `release/...`).
 2. Faça commits pequenos e descritivos.
 3. Abra PR para `main` — nunca faça push direto em `main`.
-4. Descreva o épico relacionado, o impacto e o plano de teste.
+4. Descreva o épico relacionado (ver [EPICS.md](docs/EPICS.md)), o impacto e o
+   plano de teste; cite ADRs afetados quando houver mudança de decisão.
 
 ## Checklist obrigatório
 
@@ -52,11 +67,15 @@ Quando houver FFmpeg e rede, faça smoke test com vídeo público curto autoriza
 
 - Python 3.11+.
 - Simplicidade primeiro; abstrações só com uso imediato ([ADR-014](docs/DECISIONS.md)).
+- Respeite a arquitetura descrita em [ARCHITECTURE.md](docs/ARCHITECTURE.md)
+  (um processo Uvicorn; jobs em memória no MVP; sem antecipar DB/Redis/Docker
+  sem épico autorizado).
+- Trabalhe na ordem do [ROADMAP.md](docs/ROADMAP.md); não puxe épicos futuros
+  sem reautorização.
 - Atualize README/limitações e ADRs quando a decisão mudar.
 - Marque status do épico em `docs/ROADMAP.md` e `docs/EPICS.md`.
 - Não commit `.env`, segredos, cookies ou dados pessoais.
 - Licença do projeto: Apache License 2.0 — contribuições sob os mesmos termos.
-  Ver também [docs/ADAPTERS.md](docs/ADAPTERS.md) para propor novos adapters.
 
 ## API e versionamento
 
@@ -64,6 +83,7 @@ Quando houver FFmpeg e rede, faça smoke test com vídeo público curto autoriza
 - Breaking change de contrato exige nova versão de path (`/api/v2`) e bump MAJOR
   (ou política pré-1.0 documentada no CHANGELOG).
 - Documentação interativa: `/docs`.
+- Política de release: [docs/VERSIONING.md](docs/VERSIONING.md) e ADR-021.
 
 ## Dúvidas
 

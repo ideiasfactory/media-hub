@@ -23,6 +23,7 @@ MP3 / TXT / SRT / JSON. Modular monorepo, one Uvicorn process:
 | Release notes | [http://localhost:8010/changelog](http://localhost:8010/changelog) |
 | Swagger | [http://localhost:8010/docs](http://localhost:8010/docs) |
 | Changelog | [CHANGELOG.md](CHANGELOG.md) |
+| Architecture (technical) | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) |
 | Product / ADRs | [docs/](docs/README.md) |
 
 ## Adapters
