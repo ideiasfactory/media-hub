@@ -1,0 +1,34 @@
+# DEV — local developer machine (EPIC-036 / ADR-024 / ADR-032)
+# Usage:
+#   cp .env.example .env
+#   touch registry.jsonl   # file bind-mount (avoid Docker creating a directory)
+#   mkdir -p logs output
+#   docker compose up --build
+# UI: http://localhost:8010
+
+name: media-hub-dev
+
+services:
+  media-hub:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${MEDIA_HUB_IMAGE:-media-hub:dev}
+    ports:
+      - "${MEDIA_HUB_PORT:-8010}:8010"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MEDIA_HUB_API_KEY: ${MEDIA_HUB_API_KEY:-}
+    volumes:
+      - ./logs:/app/logs
+      - ./output:/app/output
+      - ./registry.jsonl:/app/registry.jsonl
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8010/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 40s

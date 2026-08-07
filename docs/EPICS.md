@@ -848,6 +848,12 @@ volumes mapeados.
 - workers/Redis (EPIC-015)
 - build multi-arch obrigatório (pode ser follow-up)
 - storage remoto (MinIO/S3 — EPIC-004)
+- promote/CD homolog (EPIC-040); este épico só entrega packaging local/imagem
+
+### Encaixe com EPIC-040
+
+A fatia mínima de Dockerfile + Compose é pré-requisito do publish GHCR e do
+deploy em `mac-srv-01`. Preferir PR conjunta ou ordem 036 → 040 na mesma faixa.
 
 ---
 
@@ -970,10 +976,11 @@ decidida explicitamente neste épico (TASK-038-01).
 ### Dependências e encaixe na v0.2.x
 
 ```
-EPIC-035 → EPIC-036 → EPIC-037 → EPIC-038 → (v0.3 adapters)
+EPIC-035 → (EPIC-036 + EPIC-040) → EPIC-037 → EPIC-038 → (v0.3 adapters)
 ```
 
 Docker + docs (036/037) alimentam a demo “one command” usada em TASK-038-02/07.
+EPIC-040 promove a mesma imagem GHCR para homolog (`mac-srv-01`).
 Issues de adapters (038-04) preparam contribuição na v0.3 sem antecipar código.
 
 ---
@@ -1010,4 +1017,73 @@ na segunda execução da mesma URL, sem recomeçar do zero.
 - Persistência de jobs em Redis/DB (EPIC-015)
 - Kill cooperativo de FFmpeg/Whisper no meio da syscall
 - Limpeza automática de `by-content/`
+
+---
+
+## EPIC-040 — CI/CD IHL + homolog mac-srv-01
+
+**Status:** Em andamento (baseline docs + workflows; CD depende do runner)  
+**Release:** v0.2.x  
+**Depende de:** EPIC-036 (imagem Docker + volumes); preferencialmente após ou em
+paralelo controlado com EPIC-035  
+**ADRs:** 027, 028, 029, 030, 031, 032 (e 024 para packaging)  
+**Doc:** [CICD.md](CICD.md)
+
+### Objetivo
+
+Implementar a baseline CI/CD IHL do Media Hub: build once → GHCR (digest) →
+promote para **HOMOLOG** no host `mac-srv-01`, com DEV local via Compose e
+**PROD apenas documentado** (sem pipeline ativo).
+
+### Ambientes
+
+| Ambiente | Alvo | Status |
+|----------|------|--------|
+| DEV | máquina local + `docker compose` | Ativo |
+| HOMOLOG | `mac-srv-01` (labels `mac`+`homolog`, group `self-hosted-runner-ideias`) | CD ativo |
+| PROD | futuro | Documentado / não ativo |
+
+### Relação com EPIC-036
+
+EPIC-036 entrega `Dockerfile`, Compose e volumes no host. **EPIC-040 consome
+essa imagem**: publish no GHCR e deploy homolog. Sequência autorizada na
+v0.2.x:
+
+```
+EPIC-035 → (EPIC-036 + EPIC-040) → EPIC-037 → EPIC-038 restante → (v0.3)
+```
+
+Homolog **não** funciona sem packaging Docker (036). Este épico pode avançar
+em PR conjunta com a fatia mínima de 036 (imagem + compose DEV/homolog).
+
+### Inclui
+
+- ADRs 027–032 e estratégia [CICD.md](CICD.md)
+- Workflow build/publish → `ghcr.io/ideiasfactory/media-hub` (SemVer/RC/sha;
+  sem `latest` como identidade)
+- Workflow deploy homolog: `runs-on: [self-hosted, mac, homolog]`,
+  `environment: homolog`, promote por digest/tag
+- Desired state `deploy/homolog/` (compose + `versions.yaml`)
+- DEV: `docker-compose.yml` na raiz
+- Documentação do Environment `homolog` e stub futuro `production`
+- Smoke `/health` no CD homolog
+- Runbook para runner offline / secrets / GHCR
+
+### Critérios de aceite
+
+- CI existente permanece verde (lint/test/security)
+- Build de imagem válido no GitHub-hosted runner; push GHCR em `main`/tags/`workflow_dispatch`
+- Manifests homolog validam com `docker compose config` (com `MEDIA_HUB_IMAGE_REF`)
+- DEV: `docker compose config` (e up documentado) na raiz
+- Deploy homolog YAML referencia labels `mac`+`homolog` e Environment `homolog`
+- Nenhum workflow de produção ativo; PROD só em docs
+- Segredos reais ausentes do Git; placeholders documentados
+- ROADMAP / ARCHITECTURE / CHANGELOG alinhados
+
+### Fora de escopo
+
+- Deploy production automatizado
+- K3s / Helm / Argo CD (só GitOps-ready)
+- Rebuild da app no host de homolog
+- Contorno de DRM/auth/geo (ADR-013)
 

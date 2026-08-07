@@ -1,0 +1,28 @@
+# HOMOLOG — desired state for mac-srv-01 (EPIC-040 / ADR-031)
+# Image identity: prefer digest in versions.yaml; tag is convenience only.
+# Deployed by .github/workflows/deploy-homolog.yml on runner labels: mac, homolog
+
+name: media-hub-homolog
+
+services:
+  media-hub:
+    image: ${MEDIA_HUB_IMAGE_REF:?Set MEDIA_HUB_IMAGE_REF to ghcr.io/ideiasfactory/media-hub@sha256:... or :tag}
+    ports:
+      - "${MEDIA_HUB_PORT:-8010}:8010"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      MEDIA_HUB_API_KEY: ${MEDIA_HUB_API_KEY:-}
+    volumes:
+      - ${MEDIA_HUB_HOST_ENV:-./.env}:/app/.env:ro
+      - ${MEDIA_HUB_HOST_LOGS:-./logs}:/app/logs
+      - ${MEDIA_HUB_HOST_OUTPUT:-./output}:/app/output
+      - ${MEDIA_HUB_HOST_REGISTRY:-./registry.jsonl}:/app/registry.jsonl
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8010/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s

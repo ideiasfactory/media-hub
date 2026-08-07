@@ -48,7 +48,7 @@ operacional sólida):
 |------:|-------|------|--------|
 | 1 | **v0.2** ✅ | YouTube + Registry + logging local | EPIC-002 (incremento), EPIC-003, EPIC-022 fase 1 |
 | 2 | **v0.2.1** ✅ | Comunidade (fatia) + resume por URL | EPIC-038 (01/02/03/05), EPIC-039 |
-| 3 | **v0.2.x** | Hardening + deploy + docs ops | **EPIC-035 → EPIC-036 → EPIC-037** |
+| 3 | **v0.2.x** | Hardening + deploy + CI/CD homolog + docs ops | **EPIC-035 → (036 + 040) → 037** |
 | 4 | **v0.2.x** | EPIC-038 restante | tasks 04, 06, 07, 08 |
 | 5 | **v0.3** | Storage + adapters sociais + CLI | EPIC-004–006, EPIC-028 |
 | 6 | **v0.4+** | Demais adapters, STT, persistência, inteligência | conforme mapa abaixo |
@@ -57,9 +57,10 @@ A **v0.2.1** foi reautorizada pelo PO **antes** de 035–037 para desbloquear
 licença OSI, vitrine e retomada de jobs. Em seguida a ordem volta a:
 
 1. **EPIC-035** — validação de vulnerabilidades
-2. **EPIC-036** — Docker com volumes no host
-3. **EPIC-037** — documentação operacional
-4. **EPIC-038** restante — issues, distribuição, métricas
+2. **EPIC-036** — Docker com volumes no host (+ fatia mínima para imagem)
+3. **EPIC-040** — CI/CD IHL + homolog em `mac-srv-01` (GHCR, promote por digest)
+4. **EPIC-037** — documentação operacional
+5. **EPIC-038** restante — issues, distribuição, métricas
 
 Motivo original (ainda válido para adapters): ampliar Instagram/TikTok sem
 baseline de segurança/deploy aumenta risco; a fatia 038/039 antecipada não
@@ -75,7 +76,7 @@ implementa adapters sociais.
 | **v0.1.x** | Governança, DX, contrato e monorepo modular | EPIC-026–EPIC-034 |
 | **v0.2** | YouTube Evolution + Registry + logging local | EPIC-002, EPIC-003, EPIC-022 (fase 1) |
 | **v0.2.1** | Comunidade (fatia) + URL hash / resume | EPIC-038 (01/02/03/05), EPIC-039 |
-| **v0.2.x** | Segurança, Docker, docs ops, EPIC-038 restante | EPIC-035 → 036 → 037 → 038 |
+| **v0.2.x** | Segurança, Docker, CI/CD homolog, docs ops, EPIC-038 restante | EPIC-035 → (036 + 040) → 037 → 038 |
 | **v0.3** | Storage + adapters sociais + CLI | EPIC-004–EPIC-006, EPIC-028 |
 | **v0.4** | Mais adapters + multi-transcriber | EPIC-007–EPIC-014 |
 | **v0.5** | Persistência e escala | EPIC-015, EPIC-016 |
@@ -90,8 +91,9 @@ A faixa **v0.1.x** pode avançar em paralelo ao fechamento do MVP e à v0.2:
 licença, contribuição, README, SemVer, release notes, API Key e Swagger são
 prioridade alta de higiene de produto.
 
-A faixa **v0.2.x** (após **0.2.1**) retoma hardening: segurança + Docker + docs
-ops + restante do EPIC-038, antes dos adapters sociais (v0.3).
+A faixa **v0.2.x** (após **0.2.1**) retoma hardening: segurança + Docker +
+CI/CD IHL (homolog `mac-srv-01`) + docs ops + restante do EPIC-038, antes dos
+adapters sociais (v0.3). Estratégia: [CICD.md](CICD.md).
 
 ---
 
@@ -134,10 +136,11 @@ ops + restante do EPIC-038, antes dos adapters sociais (v0.3).
 | EPIC-033 | README aprimorado e widgets GitHub | Concluído |
 | EPIC-034 | Monorepo modular (frontend / BFF / backend) | Concluído |
 | EPIC-035 | Validação de vulnerabilidades de segurança | Planejado (v0.2.x — prioridade 1) |
-| EPIC-036 | Deploy Docker com volumes no host | Planejado (v0.2.x — prioridade 2) |
-| EPIC-037 | Documentação operacional (segurança + Docker) | Planejado (v0.2.x — prioridade 3) |
+| EPIC-036 | Deploy Docker com volumes no host | Planejado (v0.2.x — prioridade 2; fatia imagem com 040) |
+| EPIC-037 | Documentação operacional (segurança + Docker) | Planejado (v0.2.x — prioridade 4) |
 | EPIC-038 | Comunidade, visibilidade e engajamento open source | Em andamento (v0.2.1 — tasks 01/02/03/05) |
 | EPIC-039 | Identidade por URL + checkpoint/retomada | Concluído (v0.2.1) |
+| EPIC-040 | CI/CD IHL + homolog mac-srv-01 | Em andamento (v0.2.x — com EPIC-036) |
 
 Detalhamento de cada épico: [EPICS.md](EPICS.md).
 
@@ -175,7 +178,7 @@ CLI (EPIC-028) permanece planejado para **v0.3**.
 | **EPIC-003** | Content Registry em `registry.jsonl` com deduplicação e `force=true` |
 | **EPIC-022 (fase 1)** | Logs no console e em disco, formato estilo Java; retenção 30 dias; arquivo mensal `yyyy-mm.tar.gz` ([ADR-022](DECISIONS.md#adr-022--logging-local-estilo-java-com-retenção-e-arquivo-mensal)) |
 
-### Próxima faixa / v0.2.x — Segurança + Docker + docs + EPIC-038 restante
+### Próxima faixa / v0.2.x — Segurança + Docker + CI/CD + docs + EPIC-038 restante
 
 Após a **v0.2.1** (fatia 038 + EPIC-039):
 
@@ -183,8 +186,9 @@ Após a **v0.2.1** (fatia 038 + EPIC-039):
 |------:|-------|---------|
 | 1 | **EPIC-035** | Validação de vulnerabilidades além do baseline CI; política High/Critical; checklist de app security |
 | 2 | **EPIC-036** | Docker / Compose com volumes de `.env`/config, `logs/` e `output/` no host ([ADR-024](DECISIONS.md#adr-024--deploy-docker-com-volumes-no-host)) |
-| 3 | **EPIC-037** | Documentação operacional (README, ARCHITECTURE, CONTRIBUTING/AGENTS, release notes) |
-| 4 | **EPIC-038** restante | Issues `good first issue`, distribuição, métricas (tasks 04/06/07/08) |
+| 3 | **EPIC-040** | CI/CD IHL: GHCR `ghcr.io/ideiasfactory/media-hub`, promote homolog em `mac-srv-01` ([CICD.md](CICD.md), ADR-027–032) |
+| 4 | **EPIC-037** | Documentação operacional (README, ARCHITECTURE, CONTRIBUTING/AGENTS, release notes) |
+| 5 | **EPIC-038** restante | Issues `good first issue`, distribuição, métricas (tasks 04/06/07/08) |
 
 Metadados GitHub (description/topics) aplicados na 0.2.1 (TASK-038-03).
 
@@ -227,7 +231,9 @@ Itens abaixo permanecem fora até o épico correspondente ser autorizado:
 
 - Instagram, TikTok e demais adapters (antes de EPIC-005+; **depois** da v0.2.x,
   incluindo EPIC-038)
-- banco de dados, Redis, Celery, Kubernetes (Docker da v0.2.x **não** inclui K8s)
+- banco de dados, Redis, Celery, Kubernetes (Docker/Compose da v0.2.x; K3s só
+  como evolução GitOps-ready documentada em EPIC-040 / ADR-032)
+- pipeline de **produção** ativo (PROD adiado; Environment `production` futuro)
 - autenticação completa com usuários/OAuth e billing (EPIC-023 / EPIC-024);
   API Key simples é EPIC-026
 - frontend separado (React / Vue / Next.js)

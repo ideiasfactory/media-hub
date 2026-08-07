@@ -125,6 +125,17 @@ MEDIA_HUB_API_KEY=change-me
 uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 ```
 
+### Docker (DEV — EPIC-036)
+
+```bash
+cp .env.example .env
+mkdir -p logs output
+touch registry.jsonl
+docker compose up --build
+```
+
+CI/CD / homolog: [docs/CICD.md](docs/CICD.md).
+
 Open [http://localhost:8010](http://localhost:8010), paste a public single-video
 URL, pick model/language, then **Baixar e Transcrever**.
 
@@ -188,7 +199,9 @@ Logs: `logs/media-hub-YYYY-MM-DD.log` + monthly `logs/archive/yyyy-mm.tar.gz`
 - Whisper models download on first use;
 - private / restricted / unavailable videos may fail;
 - single YouTube videos only (no playlists yet);
-- cancel stops between pipeline steps (does not kill mid FFmpeg/Whisper call).
+- cancel stops between pipeline steps (does not kill mid FFmpeg/Whisper call);
+- production deploy pipeline is not active yet (homolog on `mac-srv-01` only;
+  see [docs/CICD.md](docs/CICD.md)).
 
 ## Troubleshooting
 

@@ -11,6 +11,14 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 ## [Unreleased]
 
+### Added
+
+- EPIC-040 / ADR-027–032: baseline CI/CD IHL — GHCR
+  `ghcr.io/ideiasfactory/media-hub`, workflows build-publish + deploy homolog
+  (`mac-srv-01`), desired state `deploy/homolog/`, doc [docs/CICD.md](docs/CICD.md).
+- Fatia EPIC-036: `Dockerfile`, `docker-compose.yml` (DEV) e volumes alinhados
+  a ADR-024 (base para promote homolog).
+
 ### Planned (v0.2 restante / follow-ups)
 
 - Demais itens do EPIC-002 (vídeo, playlists, legendas, qualidade).
@@ -20,10 +28,9 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 - EPIC-035: validação de vulnerabilidades (política High/Critical, checklist
   de app security, secret scanning; ADR-023).
-- EPIC-036: deploy Docker com volumes no host para `.env`/config, `logs/` e
-  `output/` (ADR-024).
+- EPIC-036 restante: endurecer packaging Docker / smoke documentado / UID-GID.
 - EPIC-037: documentação operacional alinhada (README, ARCHITECTURE, AGENTS).
-
+- EPIC-040 restante: validar CD end-to-end no runner `mac-srv-01` quando online.
 ## [0.2.1] - 2026-08-06
 
 ### Added

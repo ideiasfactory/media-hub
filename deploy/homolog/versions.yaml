@@ -1,0 +1,14 @@
+# Desired-state version pin for homolog (EPIC-040 / ADR-027 / ADR-030).
+# Update via CD workflow or PR — do not use floating `latest` as sole identity.
+#
+# Prefer digest when promoting (immutable). Tag is human-readable metadata.
+
+image_repository: ghcr.io/ideiasfactory/media-hub
+# SemVer / RC / sha tag used for humans and GHCR listing
+tag: "0.2.1"
+# Optional definitive identity (sha256:...). When set, deploy uses @digest.
+digest: ""
+# Full reference assembled by deploy workflow when digest is empty:
+#   ${image_repository}:${tag}
+# With digest:
+#   ${image_repository}@${digest}

@@ -311,7 +311,7 @@ Explicitamente fora de escopo em qualquer versão:
 
 ---
 
-## Deploy (planejado — EPIC-036 / ADR-024)
+## Deploy (planejado / em andamento — EPIC-036 + EPIC-040)
 
 Caminho alvo para execução em container (faixa v0.2.x), mantendo um único
 processo Uvicorn:
@@ -327,6 +327,17 @@ Host                         Container
 
 Jobs em memória continuam voláteis no restart; apenas disco mapeado persiste.
 
+### Ambientes e promote (EPIC-040 / ADR-027–032)
+
+| Ambiente | Onde | Mecanismo |
+|----------|------|-----------|
+| DEV | máquina local | `docker compose` (raiz) |
+| HOMOLOG | `mac-srv-01` | GHCR → Actions self-hosted (`mac`,`homolog`) |
+| PROD | futuro | documentado; sem pipeline ativo |
+
+Imagem: `ghcr.io/ideiasfactory/media-hub` (identidade por **digest**).  
+Desired state: `deploy/homolog/`. Estratégia: [CICD.md](CICD.md).
+
 ---
 
 ## Evolução sem overengineering
@@ -339,7 +350,7 @@ Jobs em memória continuam voláteis no restart; apenas disco mapeado persiste.
 | EPIC-002 / 005 | Extrair `SourceAdapter` quando o segundo adapter exigir |
 | EPIC-003 | Registry JSONL quando deduplicação for prioridade |
 | EPIC-022 (fase 1) | Logging local console+disco, retenção 30d, archive `yyyy-mm.tar.gz` |
-| EPIC-035–037 (0.2.x) | Hardening de segurança, Docker com volumes no host, docs operacionais |
+| EPIC-035–037 + 040 (0.2.x) | Segurança, Docker+volumes, CI/CD IHL homolog, docs ops |
 | EPIC-038 (0.2.x) | Comunidade / visibilidade: licença, README discovery, issues, distribuição |
 | EPIC-004 | Abstração de storage quando MinIO/S3 for necessário |
 | EPIC-014 | Interface `Transcriber` quando houver segundo engine |
