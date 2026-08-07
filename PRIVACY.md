@@ -14,7 +14,7 @@ a lei.
 
 ## 1. Resumo
 
-O Media Hub é um aplicativo **local, single-tenant**. Na versão atual (MVP):
+O Media Hub é um aplicativo **local, single-tenant**. Na versão atual (v0.2.x):
 
 - **não** cria contas de usuário;
 - **não** envia áudio ou transcrições para serviços de nuvem de STT;
@@ -89,7 +89,7 @@ ou são mencionadas no conteúdo. Isso depende do vídeo que você processar.
 | Cache do faster-whisper | Pesos do modelo Whisper | Cache local padrão (Hugging Face), fora de `output/` |
 
 Não há banco de dados, Redis, fila externa nem armazenamento em nuvem no escopo
-atual do MVP.
+atual do produto local.
 
 ---
 
@@ -144,7 +144,7 @@ Não há finalidade de marketing, perfilamento comercial ou venda de dados.
 
 - **Jobs em memória:** sem TTL; somem ao reiniciar o processo.
 - **Arquivos em `output/`:** **não** há limpeza automática nem endpoint de
-  exclusão no MVP; reiniciar o servidor **não** apaga esses arquivos.
+  exclusão nesta versão; reiniciar o servidor **não** apaga esses arquivos.
 - **API Key / cookie:** controlados por você (`.env` e navegador).
 
 Para excluir dados: apague manualmente os diretórios em `output/`, remova a key
@@ -176,7 +176,7 @@ Se o conteúdo processado contiver dados pessoais de terceiros, o operador da
 instância deve observar a base legal e os direitos aplicáveis (acesso, correção,
 eliminação, etc.).
 
-Na prática, no MVP:
+Na prática, nesta versão:
 
 - não há painel de “conta do titular”;
 - a eliminação de artefatos é feita no sistema de arquivos (`output/`);

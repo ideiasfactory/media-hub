@@ -61,8 +61,8 @@ Open core / multi-repo: [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md).
 
 ### Contexto
 
-O MVP precisa validar fluxo de aquisição e UX rapidamente, sem infraestrutura
-distribuída.
+A primeira entrega (v0.1) precisava validar fluxo de aquisição e UX rapidamente,
+sem infraestrutura distribuída.
 
 ### Decisão
 
@@ -140,7 +140,7 @@ Playlists e múltiplos itens aumentam complexidade de UX, progresso e storage.
 ### Decisão
 
 Aceitar apenas vídeos individuais públicos do YouTube, com `noplaylist`. Playlists,
-download de vídeo completo, autenticação e cookies ficam fora do MVP.
+download de vídeo completo, autenticação e cookies ficam fora do escopo da v0.1.
 
 ### Consequências
 
@@ -185,7 +185,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 
 ### Contexto
 
-O MVP exige STT local, sem depender de APIs pagas na primeira entrega.
+A v0.1 exige STT local, sem depender de APIs pagas na primeira entrega.
 
 ### Decisão
 
@@ -194,7 +194,7 @@ Usar `faster-whisper` em CPU com `compute_type=int8`. Modelos permitidos: `tiny`
 
 ### Consequências
 
-- Zero custo de API no caminho feliz do MVP.
+- Zero custo de API no caminho feliz da v0.1.
 - Qualidade/velocidade limitadas pelo hardware local.
 - Modelos são baixados na primeira utilização.
 - Outros engines entram via interface Transcriber (ADR-008 / EPIC-014).
@@ -264,7 +264,7 @@ Resumo, capítulos, hooks e embeddings são inteligência de negócio, não aqui
 
 ### Decisão
 
-Content Intelligence é camada posterior e opcional no pipeline. O MVP entrega
+Content Intelligence é camada posterior e opcional no pipeline. A v0.1 entrega
 apenas artefatos de aquisição/transcrição. Integrações (ex.: Video Lab) consomem
 saídas normalizadas, não o downloader.
 
@@ -312,7 +312,7 @@ A forma antiga `platform:video_id` permanece legível para migração.
 
 ### Contexto
 
-Object storage adiciona complexidade operacional cedo demais para o MVP.
+Object storage adiciona complexidade operacional cedo demais para a v0.1.
 
 ### Decisão
 
@@ -322,7 +322,7 @@ negócio.
 
 ### Consequências
 
-- Operação local simples no MVP.
+- Operação local simples na v0.1.
 - Limpeza automática e retenção ficam para épicos posteriores.
 - EPIC-004 formaliza a interface de storage.
 
@@ -390,7 +390,7 @@ futuro” sem segundo consumidor.
 
 ### Decisão
 
-A Foundation nasce com o MVP, mas interfaces formais (`SourceAdapter`,
+A Foundation nasce com a v0.1, mas interfaces formais (`SourceAdapter`,
 `Transcriber`, Storage) só são extraídas quando houver uso imediato (segundo
 adapter, segundo engine, segundo backend de storage) ou quando o épico autorizado
 exigir a abstração como entrega.
@@ -545,7 +545,7 @@ Ambos ligados à mesma tag SemVer.
 
 ### Contexto
 
-O MVP nasceu com todos os módulos em `app/`. Isso acelerou a entrega, mas misturou
+A v0.1 nasceu com todos os módulos em `app/`. Isso acelerou a entrega, mas misturou
 apresentação, borda HTTP e domínio no mesmo pacote, dificultando evolução (CLI,
 adapters, workers) sem reorganização posterior.
 
@@ -652,7 +652,7 @@ tracing, dashboards) nesta sprint. O time pediu formato familiar a logs Java
 5. **Arquivo mensal:** compactar histórico elegível em
    `logs/archive/yyyy-mm.tar.gz` (mês civil, ex.: `2026-08.tar.gz`).
 6. **Quando arquivar/limpar:** no startup da aplicação e/ou rotina leve
-   documentada; sem depender de cron externo no MVP da fase 1.
+   documentada; sem depender de cron externo na fase 1.
 7. **Fora desta ADR:** envio a SaaS, OpenTelemetry, Prometheus, dashboards
    (restante do EPIC-022 / v0.7).
 
@@ -681,7 +681,7 @@ fase.
 O CI da 0.1.2 já executa Bandit, `pip-audit`, Dependency Review e Dependabot.
 Antes de Docker e de novos adapters, o produto precisa de uma política explícita
 de severidade, checklist de segurança da aplicação e varredura de segredos —
-sem transformar o MVP local em programa de pentest.
+sem transformar o produto local self-hosted em programa de pentest.
 
 ### Decisão
 

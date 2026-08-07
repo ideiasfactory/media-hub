@@ -11,9 +11,9 @@
 
 **Paste a public YouTube URL. Get MP3, transcript, and SRT — on your machine.**
 
-Local web MVP: download public YouTube audio, transcribe with Whisper, and download
-MP3 / TXT / SRT / JSON. Modular monorepo, one Uvicorn process:
-`frontend/` · `bff/` · `backend/` · `app/`.
+Self-hosted open-source web app: download public YouTube audio, transcribe with
+Whisper, and download MP3 / TXT / SRT / JSON. Modular monorepo, one Uvicorn
+process: `frontend/` · `bff/` · `backend/` · `app/`.
 
 ![Media Hub demo](docs/assets/demo.gif)
 
@@ -55,8 +55,9 @@ login, cookies, or geo blocks. See [DISCLAIMER.md](DISCLAIMER.md).
 
 **Cole uma URL pública do YouTube. Saia com MP3, transcrição e SRT — na sua máquina.**
 
-MVP web local para baixar áudio de vídeos públicos, transcrever com Whisper e
-baixar MP3 / TXT / SRT / JSON. Monorepo modular (um processo).
+Aplicação web local open source (self-host) para baixar áudio de vídeos
+públicos, transcrever com Whisper e baixar MP3 / TXT / SRT / JSON. Monorepo
+modular (um processo).
 
 ### Adapters
 

@@ -24,6 +24,10 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 ### Changed
 
+- Nomenclatura: copy de produto/UI e docs atuais deixam de tratar o Media Hub
+  como “MVP”; o produto open source self-hosted segue na faixa **v0.2.x**.
+  Títulos históricos de épico/release (ex.: EPIC-001) permanecem onde documentam
+  o marco da v0.1.
 - `docs/CICD.md` sanitizado: comunidade = self-host + publish GHCR; detalhe
   IHL no ops privado.
 - Removidos deste repo: `.github/workflows/deploy-homolog.yml`,

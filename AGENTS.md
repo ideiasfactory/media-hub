@@ -16,7 +16,7 @@
 6. Não expor segredos, cookies, credenciais ou dados pessoais.
 7. Não implementar mecanismos para contornar DRM, autenticação, restrições territoriais ou controles de acesso.
 8. Manter compatibilidade com Python 3.11+.
-9. Para o MVP, executar com um único processo Uvicorn e manter jobs em memória.
+9. No produto local atual (v0.2.x), executar com um único processo Uvicorn e manter jobs em memória.
 10. Registrar limitações conhecidas no README e decisões relevantes em `docs/DECISIONS.md`.
 11. Manter `docs/ROADMAP.md`, `docs/EPICS.md` e `docs/ARCHITECTURE.md` alinhados ao escopo autorizado; não implementar épicos futuros sem aprovação explícita.
 12. Após o fechamento da v0.2 / v0.2.1, a próxima faixa autorizada é **v0.2.x**:
