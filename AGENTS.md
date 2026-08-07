@@ -20,9 +20,14 @@
 10. Registrar limitações conhecidas no README e decisões relevantes em `docs/DECISIONS.md`.
 11. Manter `docs/ROADMAP.md`, `docs/EPICS.md` e `docs/ARCHITECTURE.md` alinhados ao escopo autorizado; não implementar épicos futuros sem aprovação explícita.
 12. Após o fechamento da v0.2 / v0.2.1, a próxima faixa autorizada é **v0.2.x**:
-    EPIC-035 (segurança) → EPIC-036 (Docker com volumes) → EPIC-037 (docs) →
-    EPIC-038 restante. Não antecipar adapters sociais (v0.3) sem concluir ou
-    reautorizar essa ordem. (A fatia 038 + EPIC-039 na 0.2.1 foi reautorizada.)
+    EPIC-035 (segurança) → EPIC-036 (Docker com volumes) + EPIC-040 (CI/CD
+    baseline / GHCR) → EPIC-041 (ops IHL em `media-hub-ops` privado) →
+    EPIC-037 (docs) → EPIC-038 restante. Não antecipar adapters sociais (v0.3)
+    sem concluir ou reautorizar essa ordem. (A fatia 038 + EPIC-039 na 0.2.1
+    foi reautorizada.)
+13. CD / desired state de homolog IHL **não** vive no repo público — ver
+    `ideiasfactory/media-hub-ops` e [docs/OPEN_CORE_AND_OPS.md](docs/OPEN_CORE_AND_OPS.md)
+    (ADR-033).
 
 ## Arquitetura inicial
 
@@ -33,9 +38,9 @@ Monorepo modular em um único processo Uvicorn:
 - `backend/` — jobs, yt-dlp/FFmpeg, faster-whisper, models/utils;
 - `app/` — composition root (`uvicorn app.main:app`);
 - armazenamento local em `output/{job_id}`;
-- sem banco de dados, Redis, Celery, Docker ou frontend SPA no EPIC-001 / 0.1.x.
-  Docker com volumes no host entra na faixa **v0.2.x** (EPIC-036), após hardening
-  de segurança (EPIC-035).
+- sem banco de dados, Redis, Celery ou frontend SPA no EPIC-001 / 0.1.x.
+  Docker com volumes no host entra na faixa **v0.2.x** (EPIC-036); publish
+  GHCR é EPIC-040; promote homolog IHL é EPIC-041 (`media-hub-ops` privado).
 
 ## Comandos obrigatórios antes da entrega
 

@@ -22,6 +22,16 @@ documentadas explicitamente no [CHANGELOG.md](../CHANGELOG.md).
   (ADR-017).
 - Versão atual do app: campo `version` em `GET /health` e em `/openapi.json`.
 
+## Prereleases (artefatos / imagens)
+
+Além das releases estáveis `X.Y.Z`:
+
+- **RC:** tags Git `vX.Y.Z-rc.N` → imagem GHCR `:X.Y.Z-rc.N` (homolog).
+- **Dev (`main`):** tags `sha-<short>` / `dev-<fullsha>` — não são versão de produto.
+
+Identidade definitiva de promote: **digest** (`@sha256:…`).  
+Detalhes: [CICD.md](CICD.md) · [ADR-028](DECISIONS.md#adr-028--semver-rc-e-prereleases-de-artefato).
+
 ## Releases
 
 Checklist obrigatório ao fechar uma versão ([ADR-021](DECISIONS.md#adr-021--checklist-obrigatório-ao-fechar-uma-versão)):

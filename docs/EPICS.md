@@ -6,6 +6,26 @@ ADRs: [DECISIONS.md](DECISIONS.md).
 
 Legenda de status: **Em andamento** · **Planejado** · **Concluído** · **Bloqueado**
 
+### Classificação multi-repo (quando aplicável)
+
+Usar nos épicos que tocam mais de um repositório do produto (core OSS / ops /
+cloud). O monorepo `media-hub` continua a ser o núcleo; repos adicionais
+**consomem** o core (dependência unidirecional). Ver
+[OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) · [ADR-033](DECISIONS.md#adr-033--artefato-público-promote-privado-media-hub-ops).
+
+| Campo | Valores |
+|-------|---------|
+| **Repos** | `core` · `ops` · `cloud` · `core+ops` · `core+cloud` |
+| **Tipo** | **A** só core · **B** só ops/cloud · **C** cross-repo |
+| **Repo primário** | ex. `ideiasfactory/media-hub` |
+| **Repo secundário** | ex. `ideiasfactory/media-hub-ops` (se houver) |
+| **Contrato** | API / imagem / env / digest — o que o secundário consome |
+| **Ordem de entrega** | 1) … 2) … (sempre core → consumidor no tipo C) |
+
+**Tipo A** — 1 PR no core; ops só bump de pin se quiser homologar.  
+**Tipo B** — 1 PR no ops/cloud; pin de artefato core já existente.  
+**Tipo C** — contrato no core (compatível) → release/tag/digest → PR no consumidor.
+
 ---
 
 ## EPIC-001 — Foundation + YouTube Web MVP
@@ -848,6 +868,13 @@ volumes mapeados.
 - workers/Redis (EPIC-015)
 - build multi-arch obrigatório (pode ser follow-up)
 - storage remoto (MinIO/S3 — EPIC-004)
+- promote/CD homolog (EPIC-040 / EPIC-041); este épico só entrega packaging
+  local/imagem
+
+### Encaixe com EPIC-040 / EPIC-041
+
+A fatia mínima de Dockerfile + Compose é pré-requisito do publish GHCR
+(EPIC-040) e do promote no ops privado (EPIC-041).
 
 ---
 
@@ -970,10 +997,12 @@ decidida explicitamente neste épico (TASK-038-01).
 ### Dependências e encaixe na v0.2.x
 
 ```
-EPIC-035 → EPIC-036 → EPIC-037 → EPIC-038 → (v0.3 adapters)
+EPIC-035 → (EPIC-036 + EPIC-040) → EPIC-041 → EPIC-037 → EPIC-038 → (v0.3 adapters)
 ```
 
 Docker + docs (036/037) alimentam a demo “one command” usada em TASK-038-02/07.
+EPIC-040 publica a imagem no GHCR; EPIC-041 promove o mesmo digest em homolog
+via `media-hub-ops`.
 Issues de adapters (038-04) preparam contribuição na v0.3 sem antecipar código.
 
 ---
@@ -1010,4 +1039,134 @@ na segunda execução da mesma URL, sem recomeçar do zero.
 - Persistência de jobs em Redis/DB (EPIC-015)
 - Kill cooperativo de FFmpeg/Whisper no meio da syscall
 - Limpeza automática de `by-content/`
+
+---
+
+## EPIC-040 — CI/CD IHL + homolog mac-srv-01
+
+**Status:** Concluído (baseline no open; promote IHL re-homed em EPIC-041)  
+**Release:** v0.2.x  
+**Depende de:** EPIC-036 (imagem Docker + volumes); preferencialmente após ou em
+paralelo controlado com EPIC-035  
+**ADRs:** 027, 028, 029, 030, 031, 032 (e 024 para packaging); localização do
+promote → [ADR-033](DECISIONS.md#adr-033--artefato-público-promote-privado-media-hub-ops) /
+[EPIC-041](EPICS.md#epic-041--separação-ops-ihl-do-repositório-open-media-hub-ops)  
+**Doc:** [CICD.md](CICD.md) · [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md)
+
+### Objetivo
+
+Implementar a baseline CI/CD IHL do Media Hub: build once → GHCR (digest) →
+promote para **HOMOLOG**, com DEV local via Compose e **PROD apenas
+documentado** (sem pipeline ativo).
+
+### Nota de fronteira (pós-EPIC-041)
+
+A baseline (princípios ADR-027–032, `build-publish.yml`, Compose DEV, doc
+pública sanitizada) permanece neste repo. O **workflow e manifests de deploy
+homolog** passaram para o repo privado `ideiasfactory/media-hub-ops`
+(EPIC-041). Dogfooding da imagem OSS no IHL continua; só o *onde* do CD mudou.
+
+### Ambientes
+
+| Ambiente | Alvo | Status |
+|----------|------|--------|
+| DEV | máquina local + `docker compose` | Ativo (este repo) |
+| HOMOLOG | `mac-srv-01` via `media-hub-ops` | CD no ops privado |
+| PROD | futuro | Documentado / não ativo |
+
+### Relação com EPIC-036
+
+EPIC-036 entrega `Dockerfile`, Compose e volumes no host. **EPIC-040 consome
+essa imagem**: publish no GHCR e (via 041) deploy homolog. Sequência autorizada
+na v0.2.x:
+
+```
+EPIC-035 → (EPIC-036 + EPIC-040) → EPIC-041 → EPIC-037 → EPIC-038 restante → (v0.3)
+```
+
+Homolog **não** funciona sem packaging Docker (036).
+
+### Inclui (entregue)
+
+- ADRs 027–032 e estratégia [CICD.md](CICD.md) (sanitizada na 041)
+- Workflow build/publish → `ghcr.io/ideiasfactory/media-hub` (SemVer/RC/sha;
+  sem `latest` como identidade)
+- DEV: `docker-compose.yml` na raiz
+- Princípios: build once, digest, desired state, PROD stub documentado
+
+### Critérios de aceite
+
+- CI existente permanece verde (lint/test/security)
+- Build de imagem válido no GitHub-hosted runner; push GHCR em `main`/tags/`workflow_dispatch`
+- DEV: `docker compose config` (e up documentado) na raiz
+- Nenhum workflow de produção ativo; PROD só em docs
+- Segredos reais ausentes do Git; placeholders documentados
+- ROADMAP / ARCHITECTURE / CHANGELOG alinhados
+- Promote homolog: ver critérios de EPIC-041 (repo ops)
+
+### Fora de escopo
+
+- Deploy production automatizado
+- K3s / Helm / Argo CD (só GitOps-ready)
+- Rebuild da app no host de homolog
+- Contorno de DRM/auth/geo (ADR-013)
+
+---
+
+## EPIC-041 — Separação ops IHL do repositório open (media-hub-ops)
+
+**Status:** Em andamento  
+**Release:** v0.2.x (ajuste de fronteira pós-EPIC-040)  
+**Depende de:** EPIC-040 (baseline CD existente)  
+**Repos:** core+ops  
+**Tipo:** C (extrai ops do monorepo open → repo privado; core continua a
+publicar a imagem)  
+**Repo primário:** ideiasfactory/media-hub  
+**Repo secundário:** ideiasfactory/media-hub-ops (privado)  
+**Contrato:** imagem GHCR `ghcr.io/ideiasfactory/media-hub@sha256:…` (ou tag RC)  
+**Ordem:** 1) criar ops + espelhar deploy 2) validar promote no mac-srv-01
+3) remover CD/manifests IHL do open 4) docs/ADR  
+**ADRs:** 033; revê 027, 029, 031 no que toca *localização* do promote  
+**Doc:** [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) · [CICD.md](CICD.md)
+
+### Objetivo
+
+Separar **publicação de artefato OSS** de **deploy em infra IHL**, alinhando o
+repo público ao modelo open core e preparando o produto multi-repo sem fork
+divergente.
+
+### Inclui
+
+- Documento `docs/OPEN_CORE_AND_OPS.md` (discussão, conclusões, observações)
+- ADR-033: artefato público / promote privado; dependência unidirecional
+- Template de classificação multi-repo (A/B/C) em `EPICS.md`
+- Criar repo privado `media-hub-ops` com:
+  - workflow deploy homolog (equivalente ao anterior no open)
+  - `deploy/homolog/` (compose + versions.yaml + .env.example)
+  - README/runbook IHL (runner, Environment `homolog`, secrets)
+- Reapontar runner self-hosted / Environment para o repo privado (passo manual)
+- Remover do open: `.github/workflows/deploy-homolog.yml`, `deploy/homolog/`,
+  labels actionlint só de homolog
+- Atualizar `CICD.md`, `deploy/README.md`, README, ROADMAP, CHANGELOG, AGENTS
+- Manter no open: `ci.yml`, `build-publish.yml`, Dockerfile, Compose DEV
+
+### Critérios de aceite
+
+- Repo `media-hub-ops` existe, **privado**, com CD homolog (workflow + manifests)
+- Repo open **não** contém workflow nem manifests de deploy IHL
+- Build/publish GHCR no open continua; promote usa o mesmo digest
+- `CICD.md` público descreve self-host + publish; detalhe de host IHL só no ops
+- EPIC-040: baseline entregue; promote re-homed em 041 (explícito no ROADMAP)
+- `pytest` + `compileall` no open (sem regressão de app)
+- Sem segredos no Git (open ou ops)
+
+### Fora de escopo
+
+- Criar `media-hub-cloud` / SaaS multi-tenant / billing
+- Pipeline de produção
+- Mudança de licença do core
+- Alterar contrato `/api/v1` da aplicação
+- Adapters sociais (v0.3)
+
+---
 

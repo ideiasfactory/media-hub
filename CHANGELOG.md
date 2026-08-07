@@ -11,6 +11,24 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 ## [Unreleased]
 
+### Added
+
+- EPIC-040 / ADR-027–032: baseline CI/CD — GHCR
+  `ghcr.io/ideiasfactory/media-hub`, workflow `build-publish.yml`, Compose DEV,
+  doc [docs/CICD.md](docs/CICD.md).
+- Fatia EPIC-036: `Dockerfile`, `docker-compose.yml` (DEV) e volumes alinhados
+  a ADR-024 (base para promote homolog).
+- EPIC-041 / ADR-033: fronteira open core — CD homolog e `deploy/homolog/`
+  movidos para o repo privado `ideiasfactory/media-hub-ops`; doc
+  [docs/OPEN_CORE_AND_OPS.md](docs/OPEN_CORE_AND_OPS.md).
+
+### Changed
+
+- `docs/CICD.md` sanitizado: comunidade = self-host + publish GHCR; detalhe
+  IHL no ops privado.
+- Removidos deste repo: `.github/workflows/deploy-homolog.yml`,
+  `deploy/homolog/`, labels actionlint só de homolog.
+
 ### Planned (v0.2 restante / follow-ups)
 
 - Demais itens do EPIC-002 (vídeo, playlists, legendas, qualidade).
@@ -20,10 +38,10 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 - EPIC-035: validação de vulnerabilidades (política High/Critical, checklist
   de app security, secret scanning; ADR-023).
-- EPIC-036: deploy Docker com volumes no host para `.env`/config, `logs/` e
-  `output/` (ADR-024).
+- EPIC-036 restante: endurecer packaging Docker / smoke documentado / UID-GID.
 - EPIC-037: documentação operacional alinhada (README, ARCHITECTURE, AGENTS).
-
+- EPIC-041 restante: re-registar runner / Environment `homolog` no ops e
+  validar promote E2E no `mac-srv-01`.
 ## [0.2.1] - 2026-08-06
 
 ### Added
