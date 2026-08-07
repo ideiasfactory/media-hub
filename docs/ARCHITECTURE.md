@@ -311,7 +311,7 @@ Explicitamente fora de escopo em qualquer versão:
 
 ---
 
-## Deploy (planejado / em andamento — EPIC-036 + EPIC-040)
+## Deploy (planejado / em andamento — EPIC-036 + EPIC-040 + EPIC-041)
 
 Caminho alvo para execução em container (faixa v0.2.x), mantendo um único
 processo Uvicorn:
@@ -327,16 +327,17 @@ Host                         Container
 
 Jobs em memória continuam voláteis no restart; apenas disco mapeado persiste.
 
-### Ambientes e promote (EPIC-040 / ADR-027–032)
+### Ambientes e promote (EPIC-040 / EPIC-041 / ADR-027–033)
 
 | Ambiente | Onde | Mecanismo |
 |----------|------|-----------|
-| DEV | máquina local | `docker compose` (raiz) |
-| HOMOLOG | `mac-srv-01` | GHCR → Actions self-hosted (`mac`,`homolog`) |
+| DEV | máquina local | `docker compose` (raiz deste repo) |
+| HOMOLOG | infra IHL | promote no repo privado `media-hub-ops` |
 | PROD | futuro | documentado; sem pipeline ativo |
 
 Imagem: `ghcr.io/ideiasfactory/media-hub` (identidade por **digest**).  
-Desired state: `deploy/homolog/`. Estratégia: [CICD.md](CICD.md).
+Estratégia pública: [CICD.md](CICD.md) · fronteira OSS/ops:
+[OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md).
 
 ---
 

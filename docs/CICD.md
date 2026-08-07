@@ -1,9 +1,13 @@
-# Estratégia CI/CD IHL — Media Hub
+# CI/CD — Media Hub (repositório público)
 
-Documento de baseline operacional para **DEV → HOMOLOG** (promote imutável).
-PROD é futuro e **não** possui pipeline ativo neste repositório.
+Baseline para **contribuidores e self-host**: CI, build da imagem e publicação
+no GHCR. **Promote para homolog IHL** não vive neste repositório — ver
+`ideiasfactory/media-hub-ops` (privado) e
+[OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
+[ADR-033](DECISIONS.md#adr-033--artefato-público-promote-privado-media-hub-ops).
 
 Relacionado: [EPIC-040](EPICS.md#epic-040--cicd-ihl-homolog-mac-srv-01) ·
+[EPIC-041](EPICS.md#epic-041--separação-ops-ihl-do-repositório-open-media-hub-ops) ·
 [ADR-027+](DECISIONS.md) · [EPIC-036](EPICS.md#epic-036--deploy-docker-com-volumes-no-host) ·
 [VERSIONING.md](VERSIONING.md)
 
@@ -11,55 +15,50 @@ Relacionado: [EPIC-040](EPICS.md#epic-040--cicd-ihl-homolog-mac-srv-01) ·
 
 ## Princípios
 
-1. **Build once, promote same artifact** — a imagem promovida a homolog é a
-   mesma binária (digest) produzida no build; não se reconstrói por ambiente.
+1. **Build once, promote same artifact** — a imagem promovida a um ambiente é a
+   mesma binária (digest) produzida no build; não se reconstrói por ambiente
+   (ADR-027). O *promote* IHL ocorre no repo ops privado.
 2. **SemVer + prereleases** — releases: `x.y.z`; candidatos: `x.y.z-rc.N`;
    builds de integração em `main`: tags `sha-<short>` / `dev-<fullsha>`.
 3. **Artefatos imutáveis** — tags apontam para digests; **não** usar `latest`
    como identidade única em homolog/prod.
 4. **Digest = identidade definitiva** — promoção referencia
    `ghcr.io/ideiasfactory/media-hub@sha256:…`.
-5. **Ambiente = desired state** — manifests em `deploy/<env>/` (Compose +
-   `versions.yaml`); **sem** branches permanentes `homolog`/`prod`.
-6. **Registry** — GitHub Container Registry (GHCR).
-7. **Segredos fora do Git** — GitHub Environments / secrets do host; só
-   placeholders no repo.
-8. **Aprovação humana para produção** (quando existir) — Environment
-   `production` com required reviewers; hoje apenas documentado.
+5. **Registry** — GitHub Container Registry (GHCR).
+6. **Segredos fora do Git** — só placeholders no repo; secrets no host / Environments.
+7. **Aprovação humana para produção** (quando existir) — fora deste repo open.
 
 ---
 
-## Ambientes (realidade atual)
+## O que este repo faz
+
+| Peça | Caminho | Papel |
+|------|---------|--------|
+| CI | `.github/workflows/ci.yml` | Ruff, Bandit, pip-audit, pytest |
+| Build/publish | `.github/workflows/build-publish.yml` | Imagem → GHCR |
+| DEV Compose | `docker-compose.yml` (raiz) | Self-host local |
+| Dockerfile | `Dockerfile` | Imagem da aplicação |
+
+| Peça | Onde |
+|------|------|
+| Deploy homolog (`deploy-homolog.yml`) | `ideiasfactory/media-hub-ops` (privado) |
+| Desired state `deploy/homolog/` | idem |
+| Runbook runner / Environment `homolog` | idem |
+
+Regra: **artefato público, promote privado**.
+
+---
+
+## Ambientes (visão de produto)
 
 | Ambiente | Onde | Como | Status |
 |----------|------|------|--------|
-| **DEV** | máquina do desenvolvedor | `docker compose up --build` (raiz) | Ativo |
-| **HOMOLOG** | host `mac-srv-01` | Actions self-hosted + `deploy/homolog/` | Ativo (CD) |
-| **PROD** | a definir (híbrido futuro) | GitHub Environment `production` stub | **Não ativo** |
+| **DEV** | máquina do desenvolvedor | `docker compose up --build` (raiz) | Ativo (este repo) |
+| **HOMOLOG** | infra IHL | promote no repo **ops** privado | Ativo (ops) |
+| **PROD** | a definir | GitHub Environment `production` stub | **Não ativo** |
 
-### Runner homolog
-
-| Campo | Valor |
-|-------|-------|
-| Hostname / runner name | `mac-srv-01` |
-| Labels | `self-hosted`, `mac`, `homolog` |
-| Runner group | `self-hosted-runner-ideias` |
-| Workflow | `.github/workflows/deploy-homolog.yml` |
-| GitHub Environment | `homolog` |
-| Porta HTTP | `8010` (`MEDIA_HUB_PORT`) |
-| URL LAN (preferencial) | `http://mac-srv-01:8010/` → USB LAN **`192.168.15.23`** |
-| Health | `http://mac-srv-01:8010/health` |
-
-`runs-on: [self-hosted, mac, homolog]` seleciona o nó pelas labels (o nome do
-runner e o grupo são configurados na org/GitHub; o workflow não referencia o
-grupo diretamente).
-
-**Rede no host:** `mac-srv-01` tem Wi‑Fi (`en0`, tipicamente `192.168.15.21`) e
-USB LAN (`en6`, **`192.168.15.23`**). O acesso LAN estável para SSH/HTTP é o
-USB LAN. Em clientes IHL, `/etc/hosts` (e SSH `HostName`) devem apontar
-`mac-srv-01` para **`192.168.15.23`** — `192.168.15.21` costuma ser
-inalcançável a partir de outras máquinas da faixa. mDNS (`mac-srv-01.local`)
-pode anunciar o IP Wi‑Fi; prefira o nome curto via hosts ou o IP `.23`.
+Detalhe de host, labels de runner e secrets de homolog **não** são
+documentados aqui (ops interno).
 
 ---
 
@@ -69,7 +68,7 @@ pode anunciar o IP Wi‑Fi; prefira o nome curto via hosts ou o IP `.23`.
 ghcr.io/ideiasfactory/media-hub
 ```
 
-Escolha alinhada ao remote `ideiasfactory/media-hub` (ADR-030). Exemplos:
+Exemplos:
 
 ```
 ghcr.io/ideiasfactory/media-hub:0.2.2-rc.1
@@ -79,7 +78,7 @@ ghcr.io/ideiasfactory/media-hub@sha256:…
 
 ---
 
-## Fluxo
+## Fluxo (open)
 
 ```text
 PR ──► CI (lint/test/security) ──► build image (sem push)
@@ -90,35 +89,12 @@ main / tag v* / workflow_dispatch
    Build + push GHCR (digest)
          │
          ▼
-   workflow_dispatch Deploy homolog
-         │
-         ▼
-   mac-srv-01: compose pull/up + /health
+   [ops privado] promote digest → homolog IHL
 ```
 
-1. **CI** — `.github/workflows/ci.yml` (Ruff, Bandit, pip-audit, pytest).
+1. **CI** — `.github/workflows/ci.yml`.
 2. **Build/publish** — `.github/workflows/build-publish.yml` → GHCR.
-3. **Homolog** — `.github/workflows/deploy-homolog.yml` promove a ref/digest
-   escolhida; atualiza desired state em `~/media-hub-homolog` no host.
-
----
-
-## Desired state (homolog)
-
-```
-deploy/homolog/
-  docker-compose.yml   # serviço único, volumes no host
-  versions.yaml        # pin de tag/digest (metadado)
-  .env.example         # sem segredos reais
-```
-
-No runner, o workflow materializa em
-`${MEDIA_HUB_HOMOLOG_DATA_DIR:-$HOME/media-hub-homolog}`:
-
-- `.env`, `logs/`, `output/`, `registry.jsonl`
-- `docker-compose.yml` + `versions.yaml` atualizados no deploy
-
-Alinhado a EPIC-036 / ADR-024 (volumes de config, logs, output, registry).
+3. **Homolog** — workflow no `media-hub-ops` (não neste repositório).
 
 ---
 
@@ -136,92 +112,29 @@ Sem Docker: continue com venv + `uvicorn app.main:app --port 8010` (README).
 
 ---
 
-## GitHub Environments
+## Promover um digest (operadores IHL)
 
-### `homolog` (obrigatório agora)
-
-1. Repo → **Settings → Environments → New environment** → nome `homolog`
-   (já pode existir via API/`gh`).
-2. Opcional: secret `MEDIA_HUB_API_KEY`; variable `MEDIA_HUB_PORT` (default `8010`).
-3. Sem required reviewers no MVP de homolog (pode endurecer depois).
-4. Deployment branches: qualquer branch ou só `main`/tags — preferir `main` +
-   `workflow_dispatch` controlado.
-
-### `production` (futuro — não ativar deploy)
-
-Criar o Environment `production` só quando houver host/prod e ADR de promoção.
-Configurar **required reviewers**. Não há workflow de deploy prod neste repo.
+1. Obter o digest no summary do job **Build** (ou `gh api` / GHCR UI).
+2. No repo privado `media-hub-ops`, disparar deploy homolog com
+   `ghcr.io/ideiasfactory/media-hub@sha256:…`.
+3. Seguir o runbook desse repo (Environment, runner, smoke `/health`).
 
 ---
 
-## Secrets e permissões
+## Secrets e permissões (open)
 
 | Nome | Onde | Uso |
 |------|------|-----|
-| `GITHUB_TOKEN` | Actions (automático) | push/pull GHCR com `packages: write` / `read` |
-| `MEDIA_HUB_API_KEY` | Environment `homolog` (opcional) | API Key da instância homolog |
-| `MEDIA_HUB_HOMOLOG_DATA_DIR` | runner env (opcional) | override do diretório de dados |
+| `GITHUB_TOKEN` | Actions (automático) | push GHCR com `packages: write` |
 
-Pacotes GHCR: garantir que o workflow de build tenha `permissions.packages: write`
-e que a política do pacote permita leitura pelo runner homolog (público interno
-ou grant ao `GITHUB_TOKEN` do repo).
-
----
-
-## Runbook — falhas comuns
-
-### Build GHCR falha em permissão
-
-- Conferir `permissions: packages: write` no workflow.
-- Em orgs: pacotes podem exigir `GITHUB_TOKEN` com acesso a packages habilitado
-  nas settings do repo/org.
-
-### Deploy homolog não aparece em Actions / `gh workflow run` 404
-
-Workflows **somente** `workflow_dispatch` só ficam listados depois de existirem
-na branch default (`main`). Até o merge, o job **Validate homolog manifests**
-roda em PRs que tocam `deploy/homolog/**`. Após merge em `main`, use:
-
-```bash
-gh workflow run deploy-homolog.yml \
-  -f image_ref='ghcr.io/ideiasfactory/media-hub@sha256:…'
-```
-
-- Runner `mac-srv-01` offline ou sem labels `mac` e `homolog`.
-- Confirmar runner group `self-hosted-runner-ideias` e que o repo tem acesso.
-- `gh run list --workflow=deploy-homolog.yml` e inspecionar “Waiting for a runner”.
-
-### `docker compose` no Mac
-
-- Docker Desktop (ou engine equivalente) deve estar rodando na sessão do runner.
-- Labels do runner não instalam Docker; isso é pré-requisito do host.
-
-### Health check falha
-
-- Porta `MEDIA_HUB_PORT` / variable do Environment.
-- Logs: `docker compose logs` no `DATA_DIR` do host.
-- Primeira subida pode demorar (deps já na imagem; Whisper baixa modelo no
-  primeiro job, não no `/health`).
-- Se `curl http://mac-srv-01:8010/health` timeout mas
-  `curl http://192.168.15.23:8010/health` OK → corrigir `/etc/hosts` (e cache
-  DNS) para `192.168.15.23 mac-srv-01`, não `.21`.
-- Se ambos timeout: host pode ter entrado em idle sleep (`pmset sleep` curto).
-  Wake-on-LAN (`womp`) no USB LAN (`dc:32:62:56:38:91`); no host, manter
-  `caffeinate -dims` (LaunchAgent) ou `sudo pmset -a sleep 0` para papel de
-  servidor. Confirmar container: `docker ps --filter name=media-hub`.
-
-### Promover RC
-
-1. Tag `vX.Y.Z-rc.N` (ou `workflow_dispatch` no build).
-2. Anotar digest no summary do job Build.
-3. `workflow_dispatch` Deploy homolog com
-   `ghcr.io/ideiasfactory/media-hub@sha256:…`.
+Pacotes GHCR: garantir `permissions.packages: write` no build e política do
+pacote adequada para leitores autorizados (incl. runner do ops).
 
 ---
 
 ## GitOps-ready (sem antecipar K3s)
 
-Hoje: Compose + `versions.yaml` como desired state versionado.
+Hoje: Compose DEV neste repo; desired state de homolog no ops.
 
 Futuro (fora desta faixa): K3s/manifests, promoção PROD com aprovação humana,
 mesma imagem (digest) DEV→HOMOLOG→PROD. Não implementar até autorização explícita.
@@ -230,8 +143,9 @@ mesma imagem (digest) DEV→HOMOLOG→PROD. Não implementar até autorização 
 
 ## Fora de escopo (agora)
 
-- Pipeline de produção ativo
+- Pipeline de produção ativo neste ou no ops
 - Branches permanentes por ambiente
 - Rebuild por ambiente
 - Tag `latest` como única referência de promote
 - Contornar DRM/auth/geo (ADR-013)
+- Documentar topologia interna IHL no repositório público

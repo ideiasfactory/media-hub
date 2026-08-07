@@ -5,10 +5,11 @@
 | Documento | Conteúdo |
 |-----------|----------|
 | [ROADMAP.md](ROADMAP.md) | Visão estratégica, releases e status dos épicos |
-| [EPICS.md](EPICS.md) | Catálogo detalhado EPIC-001 … EPIC-040 |
+| [EPICS.md](EPICS.md) | Catálogo detalhado EPIC-001 … EPIC-041 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura atual (v0.1) e alvo da plataforma |
 | [DECISIONS.md](DECISIONS.md) | Architecture Decision Records (ADRs) |
-| [CICD.md](CICD.md) | Estratégia CI/CD IHL (DEV / homolog / PROD futuro) |
+| [CICD.md](CICD.md) | CI/CD público: self-host + publish GHCR (promote IHL no ops) |
+| [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) | Open core, fronteira OSS/ops, produto multi-repo |
 | [ADAPTERS.md](ADAPTERS.md) | Contrato para propor novos Source Adapters |
 | [VERSIONING.md](VERSIONING.md) | SemVer do produto, contrato `/api/vN` e checklist de release (ADR-021) |
 

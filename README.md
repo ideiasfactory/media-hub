@@ -134,7 +134,8 @@ touch registry.jsonl
 docker compose up --build
 ```
 
-CI/CD / homolog: [docs/CICD.md](docs/CICD.md).
+CI/CD (self-host + GHCR): [docs/CICD.md](docs/CICD.md).  
+Open core / ops: [docs/OPEN_CORE_AND_OPS.md](docs/OPEN_CORE_AND_OPS.md).
 
 Open [http://localhost:8010](http://localhost:8010), paste a public single-video
 URL, pick model/language, then **Baixar e Transcrever**.
@@ -200,8 +201,8 @@ Logs: `logs/media-hub-YYYY-MM-DD.log` + monthly `logs/archive/yyyy-mm.tar.gz`
 - private / restricted / unavailable videos may fail;
 - single YouTube videos only (no playlists yet);
 - cancel stops between pipeline steps (does not kill mid FFmpeg/Whisper call);
-- production deploy pipeline is not active yet (homolog on `mac-srv-01` only;
-  see [docs/CICD.md](docs/CICD.md)).
+- production deploy pipeline is not active yet; IHL homolog CD lives in the
+  private `media-hub-ops` repo (see [docs/CICD.md](docs/CICD.md)).
 
 ## Troubleshooting
 

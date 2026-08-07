@@ -1,2 +1,0 @@
-# Placeholder so bind-mount of registry.jsonl works on first `compose up`.
-# Runtime writes Content Registry entries here (gitignored content).

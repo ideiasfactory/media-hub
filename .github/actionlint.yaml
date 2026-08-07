@@ -1,5 +1,0 @@
-# actionlint config — custom self-hosted labels (mac-srv-01)
-self-hosted-runner:
-  labels:
-    - mac
-    - homolog

@@ -46,8 +46,10 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-030](#adr-030--ghcr-e-identidade-por-digest) | GHCR e identidade por digest | Proposed |
 | [ADR-031](#adr-031--homologação-em-mac-srv-01) | Homologação em mac-srv-01 (runner self-hosted) | Proposed |
 | [ADR-032](#adr-032--dev-compose-prod-adiado-gitops-ready) | DEV Compose; PROD adiado; GitOps-ready | Proposed |
+| [ADR-033](#adr-033--artefato-público-promote-privado-media-hub-ops) | Artefato público / promote privado (`media-hub-ops`) | Accepted |
 
-Documentação operacional: [CICD.md](CICD.md).
+Documentação operacional (comunidade): [CICD.md](CICD.md).  
+Open core / multi-repo: [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md).
 
 ---
 
@@ -833,9 +835,9 @@ com o ciclo de produto.
    a partir do Git no ambiente alvo.
 2. Artefatos de deploy são **imutáveis**; correções exigem novo build/versão.
 3. Workflows: CI de código (`.github/workflows/ci.yml`) separado de
-   build/publish (`.github/workflows/build-publish.yml`) e CD homolog
-   (`.github/workflows/deploy-homolog.yml`).
-4. Estratégia detalhada em [CICD.md](CICD.md).
+   build/publish (`.github/workflows/build-publish.yml`) neste repo; CD homolog
+   vive em `ideiasfactory/media-hub-ops` (ADR-033 / EPIC-041).
+4. Estratégia pública em [CICD.md](CICD.md); runbook IHL no ops.
 
 ### Consequências
 
@@ -901,8 +903,10 @@ hotfixes e quebram a premissa de promote do mesmo artefato.
 
 ### Consequências
 
-- CD lê manifests do branch/ref do workflow (tipicamente `main`).
+- CD lê manifests do branch/ref do workflow (tipicamente `main` do ops).
 - Rollback = redeploy de digest anterior conhecido.
+- Desired state de homolog: repo `media-hub-ops` (ADR-033); DEV Compose
+  permanece na raiz do open.
 
 ---
 
@@ -965,6 +969,9 @@ com GitHub Actions self-hosted.
    volumes (ADR-024); acesso de pull ao GHCR; host acordado (evitar idle sleep
    agressivo — `caffeinate` / `pmset`).
 4. Smoke mínimo: `GET /health` após `compose up`.
+5. **Localização (ADR-033):** o workflow e manifests de homolog residem no
+   repo privado `ideiasfactory/media-hub-ops`, não no open source. Topologia
+   detalhada do host fica no runbook do ops.
 5. Segredos (ex.: `MEDIA_HUB_API_KEY`) no GitHub Environment `homolog` ou no
    `.env` do host — nunca no Git.
 
@@ -1004,8 +1011,51 @@ agora, mantendo a arquitetura preparada para GitOps futuro (K3s).
 
 ### Consequências
 
-- EPIC-036 entrega a base de imagem/volumes; EPIC-040 entrega promote/CD.
+- EPIC-036 entrega a base de imagem/volumes; EPIC-040 entrega promote/CD
+  (baseline); a **localização** do promote IHL passa a ADR-033 / EPIC-041.
 - Evita overengineering (sem K8s na v0.2.x).
+
+---
+
+## ADR-033 — Artefato público / promote privado (`media-hub-ops`)
+
+**Status:** Accepted  
+**Data:** 2026-08-07  
+**Épico:** EPIC-041 (revisa localização do promote de ADR-027 / 029 / 031)  
+**Release:** v0.2.x  
+**Doc:** [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md)
+
+### Contexto
+
+O repositório público misturava **publicação de artefato OSS** (CI, imagem
+GHCR) com **CD e topologia IHL** (runner `mac-srv-01`, Environment `homolog`,
+desired state de homolog). Isso acopla ops interna a contribuidores externos e
+dificulta um futuro produto comercial (SaaS) sem fork divergente do core
+Apache-2.0.
+
+### Decisão
+
+1. **Artefato público, promote privado** — `ideiasfactory/media-hub` publica
+   a imagem imutável em GHCR; o promote para homolog (e futuros ambientes IHL)
+   vive no repo privado `ideiasfactory/media-hub-ops`.
+2. **Dependência unidirecional** — ops (e futuro cloud) → core. O core **não**
+   depende de ops/SaaS.
+3. **Criar `media-hub-ops`** com `deploy-homolog.yml`, `deploy/homolog/`,
+   runbook de runner/Environment/secrets. A imagem continua
+   `ghcr.io/ideiasfactory/media-hub` (mesmo digest, ADR-027).
+4. **Sanitizar docs públicos** — `CICD.md` descreve self-host + publish GHCR;
+   detalhe de host IHL fica no ops. Ver [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md).
+5. **Não criar** `media-hub-cloud` nesta decisão; reavaliar quando houver
+   multi-tenant/billing.
+
+### Consequências
+
+- Runner self-hosted e GitHub Environment `homolog` devem estar associados ao
+  repo (ou org grant) **privado** — passo operacional manual após a migração.
+- EPIC-040 permanece a baseline de princípios (build once / digest / desired
+  state); EPIC-041 só muda *onde* o CD IHL vive.
+- Contribuições OSS não precisam de labels/runner IHL no actionlint do open.
+- Produto multi-repo: classificar épicos A/B/C em [EPICS.md](EPICS.md).
 
 ---
 
