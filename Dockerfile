@@ -8,14 +8,17 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     MEDIA_HUB_HOME=/app
 
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends ffmpeg curl \
+    && apt-get install -y --no-install-recommends ffmpeg curl ca-certificates unzip \
+    && curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh \
+    && deno --version \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 COPY requirements.txt .
 RUN python -m pip install --upgrade pip \
-    && python -m pip install -r requirements.txt
+    && python -m pip install -r requirements.txt \
+    && python -m pip install "yt-dlp[default]==2026.7.4"
 
 COPY app ./app
 COPY backend ./backend

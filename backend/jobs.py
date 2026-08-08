@@ -542,7 +542,7 @@ def process_job(job_id: str) -> None:
             status=JobStatus.CANCELLED,
             message="Processamento cancelado pelo usuário",
         )
-    except Exception:
+    except Exception as exc:
         logger.exception("Falha ao processar job %s", job_id)
         try:
             _checkpoint(
@@ -562,8 +562,34 @@ def process_job(job_id: str) -> None:
         job_store.update(
             job_id,
             status=JobStatus.FAILED,
-            message=(
-                "Não foi possível processar o vídeo. Verifique a URL, a disponibilidade "
-                "pública do conteúdo e a instalação do FFmpeg."
-            ),
+            message=_user_facing_failure_message(exc),
         )
+
+
+def _user_facing_failure_message(exc: BaseException) -> str:
+    """Layperson PT-BR only — never mention FFmpeg/yt-dlp/Whisper/etc."""
+    text = str(exc).lower()
+    if any(
+        token in text
+        for token in (
+            "unavailable",
+            "private video",
+            "members-only",
+            "sign in to confirm",
+            "age-restricted",
+            "copyright",
+        )
+    ):
+        return (
+            "Este vídeo não está disponível publicamente. "
+            "Confira o link e se o conteúdo está aberto no YouTube."
+        )
+    if any(
+        token in text
+        for token in ("invalid url", "unsupported url", "não aponta para um vídeo")
+    ):
+        return "Informe uma URL pública válida do YouTube."
+    return (
+        "Não foi possível processar o vídeo. Verifique se o link é público "
+        "e tente de novo em alguns minutos."
+    )
