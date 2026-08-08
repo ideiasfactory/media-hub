@@ -8,7 +8,7 @@ Obrigado por contribuir. Este guia resume o fluxo esperado para humanos e agente
 2. Alinhe-se à **arquitetura** e ao **roadmap** do produto (obrigatório antes de
    propor features ou adapters):
    - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — monorepo `frontend` / `bff` /
-     `backend`, jobs, registry, limites do MVP;
+     `backend`, jobs, registry, limites do produto local;
    - [docs/ROADMAP.md](docs/ROADMAP.md) — releases e prioridade de execução
      autorizada pelo Product Owner;
    - [docs/EPICS.md](docs/EPICS.md) — catálogo de épicos (o que está aberto,
@@ -68,8 +68,8 @@ Quando houver FFmpeg e rede, faça smoke test com vídeo público curto autoriza
 - Python 3.11+.
 - Simplicidade primeiro; abstrações só com uso imediato ([ADR-014](docs/DECISIONS.md)).
 - Respeite a arquitetura descrita em [ARCHITECTURE.md](docs/ARCHITECTURE.md)
-  (um processo Uvicorn; jobs em memória no MVP; sem antecipar DB/Redis/Docker
-  sem épico autorizado).
+  (um processo Uvicorn; jobs em memória na arquitetura atual; sem antecipar
+  DB/Redis/Docker sem épico autorizado).
 - Trabalhe na ordem do [ROADMAP.md](docs/ROADMAP.md); não puxe épicos futuros
   sem reautorização.
 - Atualize README/limitações e ADRs quando a decisão mudar.

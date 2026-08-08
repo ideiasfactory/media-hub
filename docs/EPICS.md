@@ -76,7 +76,7 @@ Content Intelligence, Video Lab.
 
 ### Objetivo
 
-Evoluir o suporte YouTube além do MVP de áudio individual.
+Evoluir o suporte YouTube além do fluxo de áudio individual da v0.1.
 
 ### Melhorias previstas
 
@@ -448,7 +448,7 @@ Campos mínimos: `timestamp` (`yyyy-MM-dd HH:mm:ss,SSS`), `LEVEL`, `[thread]`,
 - Histórico compactado em **`tar.gz`** com nome no formato **`yyyy-mm`**
   (ex.: `logs/archive/2026-08.tar.gz`), agrupando o mês civil.
 - Rotação/arquivo pode rodar no startup do processo e/ou sob demanda (job
-  leve); sem cron externo obrigatório no MVP desta fase.
+  leve); sem cron externo obrigatório nesta fase.
 - Não enviar logs a SaaS (Datadog, CloudWatch, etc.) nesta fase.
 
 **Critérios de aceite (fase 1):**
@@ -810,7 +810,8 @@ sociais e deploy em container).
   ferramenta no CI)
 - revisão pontual dos endpoints e da UI quanto a XSS refletido / CSRF onde
   aplicável ao modelo cookie + API Key
-- relatório ou seção em docs com baseline e gaps aceitos para o MVP local
+- relatório ou seção em docs com baseline e gaps aceitos para o produto local
+  self-hosted
 - quando EPIC-036 existir: scan de imagem de container (ex.: Trivy) no CI ou
   no fluxo de build documentado
 

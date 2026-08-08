@@ -94,7 +94,7 @@ implementa adapters sociais.
 As releases são orientação de produto; a prioridade de cada épico pode ser
 ajustada pelo Product Owner sem alterar a visão arquitetural.
 
-A faixa **v0.1.x** pode avançar em paralelo ao fechamento do MVP e à v0.2:
+A faixa **v0.1.x** pode avançar em paralelo ao fechamento da v0.1 e à v0.2:
 licença, contribuição, README, SemVer, release notes, API Key e Swagger são
 prioridade alta de higiene de produto.
 

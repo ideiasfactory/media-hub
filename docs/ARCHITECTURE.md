@@ -126,8 +126,8 @@ Storage
 Content Intelligence
 ```
 
-A Foundation nasce junto com o MVP: estruturas futuras só entram quando o épico
-correspondente estiver autorizado e o código tiver uso imediato.
+A Foundation nasce junto com a v0.1 (EPIC-001): estruturas futuras só entram
+quando o épico correspondente estiver autorizado e o código tiver uso imediato.
 
 ---
 

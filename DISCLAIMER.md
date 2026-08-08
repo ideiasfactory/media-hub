@@ -140,8 +140,8 @@ O software é fornecido **“como está”**, sem garantia de que:
 - o resultado da transcrição seja completo, preciso ou adequado a qualquer fim;
 - o uso esteja em conformidade com contratos, políticas de plataforma ou leis
   locais;
-- a ferramenta detecte automaticamente conteúdo ilegal (o MVP **não** inclui
-  moderação automática de CSAM ou filtros equivalentes).
+- a ferramenta detecte automaticamente conteúdo ilegal (a versão atual **não**
+  inclui moderação automática de CSAM ou filtros equivalentes).
 
 A disponibilidade técnica de uma URL pública **não** significa permissão legal
 para download, cópia, transcrição ou redistribuição, nem que o conteúdo seja

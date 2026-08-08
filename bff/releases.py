@@ -78,7 +78,7 @@ USER_RELEASES: list[dict[str, Any]] = [
     {
         "version": "0.1.0",
         "date": "2026-08-06",
-        "title": "Primeiro MVP do YouTube",
+        "title": "Foundation YouTube (v0.1)",
         "summary": (
             "Baixe o áudio de um vídeo público, transcreva localmente e baixe MP3, TXT, SRT e JSON."
         ),
