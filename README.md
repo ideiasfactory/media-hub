@@ -135,7 +135,8 @@ docker compose up --build
 ```
 
 CI/CD (self-host + GHCR): [docs/CICD.md](docs/CICD.md).  
-Open core / ops: [docs/OPEN_CORE_AND_OPS.md](docs/OPEN_CORE_AND_OPS.md).
+Open core / ops / cloud: [docs/OPEN_CORE_AND_OPS.md](docs/OPEN_CORE_AND_OPS.md) ·
+[docs/REPO_SEGMENTATION.md](docs/REPO_SEGMENTATION.md).
 
 Open [http://localhost:8010](http://localhost:8010), paste a public single-video
 URL, pick model/language, then **Baixar e Transcrever**.

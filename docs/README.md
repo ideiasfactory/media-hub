@@ -10,6 +10,7 @@
 | [DECISIONS.md](DECISIONS.md) | Architecture Decision Records (ADRs) |
 | [CICD.md](CICD.md) | CI/CD público: self-host + publish GHCR (promote IHL no ops) |
 | [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) | Open core, fronteira OSS/ops, produto multi-repo |
+| [REPO_SEGMENTATION.md](REPO_SEGMENTATION.md) | Topologia 3 repos (core/ops/cloud) + DAG de segmentação |
 | [ADAPTERS.md](ADAPTERS.md) | Contrato para propor novos Source Adapters |
 | [VERSIONING.md](VERSIONING.md) | SemVer do produto, contrato `/api/vN` e checklist de release (ADR-021) |
 

@@ -21,6 +21,9 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 - EPIC-041 / ADR-033: fronteira open core — CD homolog e `deploy/homolog/`
   movidos para o repo privado `ideiasfactory/media-hub-ops`; doc
   [docs/OPEN_CORE_AND_OPS.md](docs/OPEN_CORE_AND_OPS.md).
+- [docs/REPO_SEGMENTATION.md](docs/REPO_SEGMENTATION.md): topologia
+  core / ops / cloud + DAG de segmentação; skeleton privado
+  `ideiasfactory/media-hub-cloud` (sem fork do open).
 
 ### Changed
 
@@ -28,6 +31,10 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
   IHL no ops privado.
 - Removidos deste repo: `.github/workflows/deploy-homolog.yml`,
   `deploy/homolog/`, labels actionlint só de homolog.
+- ADRs 024 / 027–033: higiene de status e remoção de topologia IHL do corpo
+  público (ADR-031); ADR-033 permite skeleton `media-hub-cloud`.
+- EPIC-023 / EPIC-024 marcados `repo=cloud`; EPIC-041 concluído (follow-ups
+  operacionais no ops).
 
 ### Planned (v0.2 restante / follow-ups)
 
@@ -40,8 +47,8 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
   de app security, secret scanning; ADR-023).
 - EPIC-036 restante: endurecer packaging Docker / smoke documentado / UID-GID.
 - EPIC-037: documentação operacional alinhada (README, ARCHITECTURE, AGENTS).
-- EPIC-041 restante: re-registar runner / Environment `homolog` no ops e
-  validar promote E2E no `mac-srv-01`.
+- Ops (humano): re-registar runner / Environment `homolog`, permissões GHCR,
+  promote E2E (ver `media-hub-ops`).
 ## [0.2.1] - 2026-08-06
 
 ### Added

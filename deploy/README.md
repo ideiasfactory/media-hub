@@ -5,8 +5,9 @@ This public repository ships **DEV** Compose at the repo root
 
 IHL homolog desired state and CD live in the private repo
 `ideiasfactory/media-hub-ops` (EPIC-041 / ADR-033). See
-[docs/CICD.md](../docs/CICD.md) and
-[docs/OPEN_CORE_AND_OPS.md](../docs/OPEN_CORE_AND_OPS.md).
+[docs/CICD.md](../docs/CICD.md),
+[docs/OPEN_CORE_AND_OPS.md](../docs/OPEN_CORE_AND_OPS.md), and
+[docs/REPO_SEGMENTATION.md](../docs/REPO_SEGMENTATION.md).
 
 | Path | Environment | Notes |
 |------|-------------|-------|

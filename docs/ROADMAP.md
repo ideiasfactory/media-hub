@@ -19,7 +19,13 @@ A evolução é orientada por **Adapters** (fontes) e **Transcribers** (engines)
 para adicionar plataformas e motores sem alterar o restante do sistema.
 
 Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
-[EPICS.md](EPICS.md) · [DECISIONS.md](DECISIONS.md)
+[EPICS.md](EPICS.md) · [DECISIONS.md](DECISIONS.md) ·
+[OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
+[REPO_SEGMENTATION.md](REPO_SEGMENTATION.md)
+
+**Repos do produto:** `media-hub` (core, público) · `media-hub-ops` (ops IHL,
+privado) · `media-hub-cloud` (SaaS, privado, skeleton). Índice de épicos
+permanece neste repo.
 
 ---
 
@@ -95,7 +101,8 @@ prioridade alta de higiene de produto.
 A faixa **v0.2.x** (após **0.2.1**) retoma hardening: segurança + Docker +
 CI/CD (publish GHCR no open; promote IHL no ops privado — EPIC-041) + docs ops
 + restante do EPIC-038, antes dos adapters sociais (v0.3). Estratégia:
-[CICD.md](CICD.md) · [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md).
+[CICD.md](CICD.md) · [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
+[REPO_SEGMENTATION.md](REPO_SEGMENTATION.md).
 
 ---
 
@@ -125,8 +132,8 @@ CI/CD (publish GHCR no open; promote IHL no ops privado — EPIC-041) + docs ops
 | EPIC-020 | Embeddings | Planejado |
 | EPIC-021 | Administração | Planejado |
 | EPIC-022 | Observabilidade | Fase 1 concluída (v0.2.0); resto planejado (v0.7) |
-| EPIC-023 | Autenticação completa (usuários / OAuth) | Planejado |
-| EPIC-024 | Billing | Planejado |
+| EPIC-023 | Autenticação completa (usuários / OAuth) | Planejado (repo=`cloud`) |
+| EPIC-024 | Billing | Planejado (repo=`cloud`) |
 | EPIC-025 | Media Hub Platform 1.0 | Planejado |
 | EPIC-026 | API Key via `.env` | Concluído |
 | EPIC-027 | OpenAPI / Swagger | Concluído |
@@ -143,7 +150,7 @@ CI/CD (publish GHCR no open; promote IHL no ops privado — EPIC-041) + docs ops
 | EPIC-038 | Comunidade, visibilidade e engajamento open source | Em andamento (v0.2.1 — tasks 01/02/03/05) |
 | EPIC-039 | Identidade por URL + checkpoint/retomada | Concluído (v0.2.1) |
 | EPIC-040 | CI/CD IHL baseline (GHCR publish) | Concluído (baseline; promote re-homed em 041) |
-| EPIC-041 | Separação ops IHL (`media-hub-ops`) | Em andamento (v0.2.x — fronteira open core) |
+| EPIC-041 | Separação ops IHL (`media-hub-ops`) | Concluído (v0.2.x — follow-ups ops manuais) |
 
 Detalhamento de cada épico: [EPICS.md](EPICS.md).
 
@@ -190,7 +197,7 @@ Após a **v0.2.1** (fatia 038 + EPIC-039):
 | 1 | **EPIC-035** | Validação de vulnerabilidades além do baseline CI; política High/Critical; checklist de app security |
 | 2 | **EPIC-036** | Docker / Compose com volumes de `.env`/config, `logs/` e `output/` no host ([ADR-024](DECISIONS.md#adr-024--deploy-docker-com-volumes-no-host)) |
 | 3 | **EPIC-040** | CI/CD baseline: GHCR `ghcr.io/ideiasfactory/media-hub` ([CICD.md](CICD.md), ADR-027–032) |
-| 4 | **EPIC-041** | Ops IHL em repo privado `media-hub-ops`; artefato público / promote privado ([OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md), ADR-033) |
+| 4 | **EPIC-041** | Ops IHL em repo privado `media-hub-ops`; artefato público / promote privado ([OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md), [REPO_SEGMENTATION.md](REPO_SEGMENTATION.md), ADR-033) — ✅ migração; follow-ups runner/GHCR no ops |
 | 5 | **EPIC-037** | Documentação operacional (README, ARCHITECTURE, CONTRIBUTING/AGENTS, release notes) |
 | 6 | **EPIC-038** restante | Issues `good first issue`, distribuição, métricas (tasks 04/06/07/08) |
 
@@ -220,8 +227,8 @@ Content Intelligence, integração com Video Lab, Search API e embeddings para R
 ### v0.7 — Operação (EPIC-021–024)
 
 Admin, restante da observabilidade (métricas/tracing/dashboards — EPIC-022),
-autenticação completa (usuários/OAuth — evolução da API Key do EPIC-026) e
-billing.
+autenticação completa (usuários/OAuth — EPIC-023, **repo=`cloud`**) e billing
+(EPIC-024, **repo=`cloud`**).
 
 ### v1.0 — Platform (EPIC-025)
 

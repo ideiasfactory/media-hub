@@ -351,7 +351,7 @@ Estratégia pública: [CICD.md](CICD.md) · fronteira OSS/ops:
 | EPIC-002 / 005 | Extrair `SourceAdapter` quando o segundo adapter exigir |
 | EPIC-003 | Registry JSONL quando deduplicação for prioridade |
 | EPIC-022 (fase 1) | Logging local console+disco, retenção 30d, archive `yyyy-mm.tar.gz` |
-| EPIC-035–037 + 040 (0.2.x) | Segurança, Docker+volumes, CI/CD IHL homolog, docs ops |
+| EPIC-035–037 + 040–041 (0.2.x) | Segurança, Docker+volumes, CI/CD GHCR, ops IHL privado, docs |
 | EPIC-038 (0.2.x) | Comunidade / visibilidade: licença, README discovery, issues, distribuição |
 | EPIC-004 | Abstração de storage quando MinIO/S3 for necessário |
 | EPIC-014 | Interface `Transcriber` quando houver segundo engine |
