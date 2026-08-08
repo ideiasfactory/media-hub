@@ -585,8 +585,7 @@ def _user_facing_failure_message(exc: BaseException) -> str:
             "Confira o link e se o conteúdo está aberto no YouTube."
         )
     if any(
-        token in text
-        for token in ("invalid url", "unsupported url", "não aponta para um vídeo")
+        token in text for token in ("invalid url", "unsupported url", "não aponta para um vídeo")
     ):
         return "Informe uma URL pública válida do YouTube."
     return (
