@@ -10,11 +10,29 @@ def _youtube_dl(options: dict[str, Any]):
     return YoutubeDL(options)
 
 
-def fetch_metadata(url: str) -> dict[str, Any]:
-    options = {
+def _base_options() -> dict[str, Any]:
+    """Shared yt-dlp options for YouTube public URLs.
+
+    Deno (or another JS runtime) must be on PATH so yt-dlp can solve YouTube
+    n/sig challenges. Without it, format URLs often return HTTP 403.
+    See https://github.com/yt-dlp/yt-dlp/wiki/EJS
+    """
+    return {
         "quiet": True,
         "no_warnings": True,
         "noplaylist": True,
+        # Prefer default clients; drop android_sdkless which commonly 403s.
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["default", "-android_sdkless"],
+            }
+        },
+    }
+
+
+def fetch_metadata(url: str) -> dict[str, Any]:
+    options = {
+        **_base_options(),
         "skip_download": True,
     }
     with _youtube_dl(options) as downloader:
@@ -27,11 +45,9 @@ def fetch_metadata(url: str) -> dict[str, Any]:
 def download_audio(url: str, job_dir: Path) -> Path:
     output_template = str(job_dir / "source.%(ext)s")
     options = {
+        **_base_options(),
         "format": "bestaudio/best",
         "outtmpl": output_template,
-        "noplaylist": True,
-        "quiet": True,
-        "no_warnings": True,
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
