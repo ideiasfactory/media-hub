@@ -1,0 +1,63 @@
+# Media Hub — CUDA opt-in image (P1-03 / ADR-034)
+# Default/CPU image remains ./Dockerfile (GHCR publish unchanged).
+#
+# Build (on an NVIDIA host or CI with Buildx):
+#   docker build -f Dockerfile.cuda -t media-hub:cuda .
+#
+# Run (requires nvidia-container / Docker Desktop GPU):
+#   docker run --rm --gpus all -e MEDIA_HUB_WHISPER_DEVICE=cuda -p 8010:8010 media-hub:cuda
+#
+# Base: NVIDIA CUDA 12 + cuDNN runtime (faster-whisper / ctranslate2 need
+# cuBLAS + cuDNN 9). Host driver must be new enough for the GPU (e.g. RTX 50xx).
+
+FROM nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    MEDIA_HUB_HOME=/app \
+    DEBIAN_FRONTEND=noninteractive \
+    MEDIA_HUB_WHISPER_DEVICE=cuda
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3.11 \
+        python3.11-venv \
+        python3.11-distutils \
+        ffmpeg \
+        curl \
+        ca-certificates \
+        unzip \
+    && ln -sf /usr/bin/python3.11 /usr/local/bin/python \
+    && ln -sf /usr/bin/python3.11 /usr/local/bin/python3 \
+    && curl -fsSL https://bootstrap.pypa.io/get-pip.py -o /tmp/get-pip.py \
+    && python /tmp/get-pip.py \
+    && rm /tmp/get-pip.py \
+    && curl -fsSL https://deno.land/install.sh | DENO_INSTALL=/usr/local sh \
+    && deno --version \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN python -m pip install --upgrade pip \
+    && python -m pip install -r requirements.txt \
+    && python -m pip install "yt-dlp[default]==2026.7.4"
+
+COPY app ./app
+COPY backend ./backend
+COPY bff ./bff
+COPY frontend ./frontend
+
+RUN mkdir -p /app/output /app/logs \
+    && useradd --create-home --uid 10001 --shell /usr/sbin/nologin mediahub \
+    && chown -R mediahub:mediahub /app
+
+USER mediahub
+
+EXPOSE 8010
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+    CMD curl -fsS http://127.0.0.1:8010/health || exit 1
+
+CMD ["python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8010"]

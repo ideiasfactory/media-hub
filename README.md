@@ -140,9 +140,16 @@ MEDIA_HUB_WHISPER_DEVICE=cpu
 **CUDA (opt-in only):**
 
 1. On the host: `nvidia-smi` must list the GPU.
-2. If using Docker: pass the GPU (`docker run --gpus all …` / Compose `deploy.resources` /
-   Docker Desktop WSL2 with GPU enabled). The stock DEV Compose image is CPU-oriented;
-   a dedicated GPU image/profile is a follow-up (P1-03).
+2. If using Docker: pass the GPU (`docker run --gpus all …` / Compose `gpus: all` /
+   Docker Desktop WSL2 with GPU enabled). The stock DEV Compose + GHCR image is
+   **CPU-oriented**. For CUDA in Docker, use the opt-in GPU files:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.cuda.yml up --build -d
+```
+
+   (`Dockerfile.cuda` — NVIDIA CUDA 12 + cuDNN runtime; not published as the
+   default GHCR image.)
 3. Set env and keep **STT concurrency = 1** per worker:
 
 ```bash
