@@ -120,6 +120,51 @@ Optional API protection in `.env`:
 MEDIA_HUB_API_KEY=change-me
 ```
 
+### Whisper: CPU (default) vs CUDA (opt-in)
+
+Media Hub supports **both** modes. Pick one via `.env` — [ADR-006](docs/DECISIONS.md) /
+[ADR-034](docs/DECISIONS.md).
+
+| Mode | When to use | Env | Default compute |
+|------|-------------|-----|-----------------|
+| **CPU** | Laptops, CI, Docker without GPU, first self-host | unset or `MEDIA_HUB_WHISPER_DEVICE=cpu` | `int8` |
+| **CUDA** | NVIDIA host with working driver + CUDA for ctranslate2 | `MEDIA_HUB_WHISPER_DEVICE=cuda` | `float16` |
+
+**CPU (safe default):**
+
+```bash
+MEDIA_HUB_WHISPER_DEVICE=cpu
+# MEDIA_HUB_WHISPER_COMPUTE_TYPE=int8
+```
+
+**CUDA (opt-in only):**
+
+1. On the host: `nvidia-smi` must list the GPU.
+2. If using Docker: pass the GPU (`docker run --gpus all …` / Compose `deploy.resources` /
+   Docker Desktop WSL2 with GPU enabled). The stock DEV Compose image is CPU-oriented;
+   a dedicated GPU image/profile is a follow-up (P1-03).
+3. Set env and keep **STT concurrency = 1** per worker:
+
+```bash
+MEDIA_HUB_WHISPER_DEVICE=cuda
+# MEDIA_HUB_WHISPER_COMPUTE_TYPE=float16
+```
+
+**Verify:** logs show
+`Loading Whisper model=… device=cuda compute_type=float16` (or `device=cpu`).
+Config-only smoke:
+
+```bash
+python scripts/smoke_whisper_device.py
+MEDIA_HUB_WHISPER_DEVICE=cuda python scripts/smoke_whisper_device.py --load-model
+```
+
+**If CUDA is requested but unavailable:** the runtime **falls back to CPU**
+with a clear **warning** in the logs (and `/health` → `whisper.cuda_fallback`
+after the first model load). It does **not** hard-fail. Check logs for
+`Whisper using device=cpu … (CUDA fallback)` and fix `nvidia-smi` / `--gpus`
+when you need GPU performance.
+
 ## Run
 
 ```bash
@@ -198,8 +243,11 @@ Logs: `logs/media-hub-YYYY-MM-DD.log` + monthly `logs/archive/yyyy-mm.tar.gz`
 - jobs live in memory only (lost on restart);
 - single Uvicorn process; workers do not share job state;
 - `output/` is not auto-cleaned;
-- no queue / concurrency limits;
+- no queue / concurrency limits in the local monolith (single Uvicorn);
+  GPU deployments should keep **STT concurrency = 1** per worker (ADR-034);
 - Whisper models download on first use;
+- `MEDIA_HUB_WHISPER_DEVICE=cuda` prefers NVIDIA/CUDA; if unavailable, falls
+  back to CPU with a warning (CPU remains the default when unset);
 - private / restricted / unavailable videos may fail;
 - single YouTube videos only (no playlists yet);
 - cancel stops between pipeline steps (does not kill mid FFmpeg/Whisper call);
@@ -210,6 +258,9 @@ Logs: `logs/media-hub-YYYY-MM-DD.log` + monthly `logs/archive/yyyy-mm.tar.gz`
 
 - **FFmpeg missing:** install and run `ffmpeg -version`.
 - **Slow first run:** model download — check network and disk.
+- **CUDA unavailable / slow STT:** CUDA was requested but init failed → CPU
+  fallback with warning. Confirm `nvidia-smi` and Docker `--gpus`, or set
+  `MEDIA_HUB_WHISPER_DEVICE=cpu` deliberately. Check `/health` → `whisper`.
 - **Job fails:** URL must be public and login-free; update `yt-dlp` if YouTube changes.
 - **Job vanished:** restart clears in-memory jobs; submit again (registry may resume).
 - **401:** set/send `MEDIA_HUB_API_KEY` or leave it empty for open local mode.

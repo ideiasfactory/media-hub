@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from backend.jobs import OUTPUT_ROOT
 from backend.logging_setup import setup_logging
+from backend.transcription import get_whisper_device_status
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
@@ -39,8 +42,13 @@ def create_app() -> FastAPI:
     application.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
     @application.get("/health")
-    def health() -> dict[str, str]:
-        return {"status": "ok", "version": __version__}
+    def health() -> dict[str, Any]:
+        # Cheap: env-resolved request + last effective device after a model load.
+        return {
+            "status": "ok",
+            "version": __version__,
+            "whisper": get_whisper_device_status(),
+        }
 
     def custom_openapi() -> dict:
         if application.openapi_schema:

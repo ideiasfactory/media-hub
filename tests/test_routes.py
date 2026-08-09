@@ -9,7 +9,12 @@ client = TestClient(app)
 def test_health() -> None:
     response = client.get("/health")
     assert response.status_code == 200
-    assert response.json() == {"status": "ok", "version": __version__}
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["version"] == __version__
+    assert "whisper" in payload
+    assert payload["whisper"]["device_requested"] in {"cpu", "cuda"}
+    assert "cuda_fallback" in payload["whisper"]
 
 
 def test_index() -> None:
