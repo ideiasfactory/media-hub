@@ -6,6 +6,7 @@ import pytest
 from backend.transcription import (
     WhisperDeviceError,
     build_whisper_model,
+    get_whisper_device_status,
     resolve_whisper_compute_type,
     resolve_whisper_device,
     transcribe_audio,
@@ -113,14 +114,47 @@ def test_transcribe_audio_cpu_default_int8(monkeypatch: pytest.MonkeyPatch, tmp_
     assert captured == {"device": "cpu", "compute_type": "int8"}
 
 
-def test_cuda_init_failure_does_not_fallback_to_cpu(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_cuda_unavailable_falls_back_to_cpu_with_warning(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    monkeypatch.setenv("MEDIA_HUB_WHISPER_DEVICE", "cuda")
+    monkeypatch.delenv("MEDIA_HUB_WHISPER_COMPUTE_TYPE", raising=False)
+    calls: list[tuple[str, str]] = []
+
+    class FallbackModel:
+        def __init__(self, model_name: str, device: str, compute_type: str) -> None:
+            calls.append((device, compute_type))
+            if device == "cuda":
+                raise RuntimeError("CUDA driver not found")
+            assert model_name == "tiny"
+
+    _install_fake_faster_whisper(monkeypatch, FallbackModel)
+
+    import logging
+
+    with caplog.at_level(logging.WARNING, logger="backend.transcription"):
+        model = build_whisper_model("tiny", "cuda", "float16")
+
+    assert model is not None
+    assert calls == [("cuda", "float16"), ("cpu", "int8")]
+    assert any("falling back to CPU" in record.message for record in caplog.records)
+    assert any("Whisper using device=cpu" in record.message for record in caplog.records)
+
+    status = get_whisper_device_status()
+    assert status["device_requested"] == "cuda"
+    assert status["device_effective"] == "cpu"
+    assert status["compute_type"] == "int8"
+    assert status["cuda_fallback"] is True
+
+
+def test_cuda_and_cpu_fallback_both_fail(monkeypatch: pytest.MonkeyPatch) -> None:
     class BoomModel:
         def __init__(self, *_args: Any, **_kwargs: Any) -> None:
-            raise RuntimeError("CUDA driver not found")
+            raise RuntimeError("no backend")
 
     _install_fake_faster_whisper(monkeypatch, BoomModel)
 
-    with pytest.raises(WhisperDeviceError, match="does not silently fall back"):
+    with pytest.raises(WhisperDeviceError, match="CPU fallback also failed"):
         build_whisper_model("tiny", "cuda", "float16")
 
 

@@ -29,6 +29,7 @@ via cookie HttpOnly quando há API Key e delega o processamento ao backend.
 5. `faster-whisper` gera segmentos e idioma. Default: `device=cpu`,
    `compute_type=int8` (ADR-006). Opcional: `MEDIA_HUB_WHISPER_DEVICE=cuda`
    (e `MEDIA_HUB_WHISPER_COMPUTE_TYPE`, default `float16` em CUDA) — ADR-034.
+   Se CUDA for pedida e indisponível → fallback CPU com warning (não hard-fail).
 6. A aplicação grava TXT, SRT e JSON em `output/{job_id}`.
 7. A UI exibe o resultado e oferece downloads por whitelist fixa.
 

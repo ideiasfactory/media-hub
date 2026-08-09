@@ -25,7 +25,7 @@ Dual mode — see `.env.example` and
 | Mode | Env | Notes |
 |------|-----|-------|
 | CPU (default) | unset / `MEDIA_HUB_WHISPER_DEVICE=cpu` | Safe; DEV Compose works as-is |
-| CUDA (opt-in) | `MEDIA_HUB_WHISPER_DEVICE=cuda` | Needs `nvidia-smi` + Docker `--gpus`; STT conc=1; **no** silent CPU fallback |
+| CUDA (opt-in) | `MEDIA_HUB_WHISPER_DEVICE=cuda` | Needs `nvidia-smi` + Docker `--gpus`; STT conc=1; if CUDA unavailable → **CPU + warning** (not silent) |
 
 GPU worker bind-mounts (ops/cloud) should use a native Linux filesystem path
 (e.g. `$HOME/ihl/{project}/…` on WSL2), not `/mnt/c/...`.

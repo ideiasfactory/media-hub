@@ -1094,7 +1094,7 @@ Operadores precisam escolher de forma óbvia via config/env, sem fork do core e
 sem quebrar o caminho CPU.
 
 Imagem Docker GPU / profile NVIDIA fica para fatia seguinte (P1-03); esta ADR
-cobre a seleção de device no runtime + política de erro.
+cobre a seleção de device no runtime + política de fallback com aviso.
 
 ### Decisão
 
@@ -1104,12 +1104,15 @@ cobre a seleção de device no runtime + política de erro.
    - `MEDIA_HUB_WHISPER_DEVICE` — `cpu` (default) ou `cuda`.
    - `MEDIA_HUB_WHISPER_COMPUTE_TYPE` — opcional; se omitido: `int8` em CPU,
      `float16` em CUDA.
-3. **Sem fallback silencioso:** se `device=cuda` e a inicialização falhar,
-   o job falha com `WhisperDeviceError` explícito. Operador corrige a stack
-   NVIDIA/`--gpus` **ou** muda deliberadamente para `cpu`. Fallback automático
-   para CPU esconderia misconfig e performance errada.
+3. **Fallback CUDA→CPU com aviso (não silencioso):** se `device=cuda` e a
+   inicialização falhar, o runtime **cai para CPU** (`compute_type` default
+   CPU), emite **warning** claro nos logs (pedido vs device efetivo) e segue o
+   job. Não hard-fail só porque a GPU está ausente/misconfigurada. Operador
+   deve corrigir NVIDIA/`--gpus` para obter CUDA de verdade; `/health` pode
+   expor `whisper.cuda_fallback` / `device_effective` após o primeiro load.
 4. **Observabilidade:** log `Loading Whisper model=… device=… compute_type=…`
-   no load; verificar também `nvidia-smi` no host antes de optar por CUDA.
+   no load; após fallback, log `Whisper using device=cpu … (CUDA fallback)`;
+   verificar também `nvidia-smi` no host antes de optar por CUDA.
 5. **Concorrência STT = 1** por processo/worker quando `device=cuda` (VRAM /
    estabilidade). O monólito local v0.2.x já é um único Uvicorn; ops de worker
    GPU deve manter conc=1 até medição autorizar mais.

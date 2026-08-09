@@ -15,7 +15,8 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 - ADR-034 / P1-02: dual-mode Whisper — CPU default (ADR-006) and opt-in
   `MEDIA_HUB_WHISPER_DEVICE=cuda` (+ optional `MEDIA_HUB_WHISPER_COMPUTE_TYPE`).
-  CUDA init failures raise `WhisperDeviceError` (no silent CPU fallback).
+  If CUDA is requested but unavailable → **CPU fallback with warning** (not a
+  hard-fail; not silent). `/health` exposes `whisper` status after load.
   Docs/`.env.example` make the choice explicit; smoke:
   `scripts/smoke_whisper_device.py`.
 - EPIC-040 / ADR-027–032: baseline CI/CD — GHCR

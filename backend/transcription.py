@@ -16,9 +16,17 @@ DEFAULT_COMPUTE_BY_DEVICE = {
 
 logger = logging.getLogger(__name__)
 
+# Last successful WhisperModel load (cheap status for /health).
+_whisper_runtime: dict[str, Any] = {
+    "device_requested": None,
+    "device_effective": None,
+    "compute_type": None,
+    "cuda_fallback": False,
+}
+
 
 class WhisperDeviceError(RuntimeError):
-    """Raised when the requested Whisper device cannot be initialized."""
+    """Raised when Whisper cannot initialize on any usable device."""
 
 
 def resolve_whisper_device(raw: str | None = None) -> str:
@@ -40,10 +48,34 @@ def resolve_whisper_compute_type(device: str, raw: str | None = None) -> str:
     return DEFAULT_COMPUTE_BY_DEVICE.get(device, "int8")
 
 
+def get_whisper_device_status() -> dict[str, Any]:
+    """Return configured + last-effective Whisper device (for health/ops)."""
+    return {
+        "device_requested": resolve_whisper_device(),
+        "device_effective": _whisper_runtime["device_effective"],
+        "compute_type": _whisper_runtime["compute_type"],
+        "cuda_fallback": bool(_whisper_runtime["cuda_fallback"]),
+    }
+
+
+def _record_whisper_runtime(
+    *,
+    requested: str,
+    effective: str,
+    compute_type: str,
+    cuda_fallback: bool,
+) -> None:
+    _whisper_runtime["device_requested"] = requested
+    _whisper_runtime["device_effective"] = effective
+    _whisper_runtime["compute_type"] = compute_type
+    _whisper_runtime["cuda_fallback"] = cuda_fallback
+
+
 def build_whisper_model(model_name: str, device: str, compute_type: str) -> Any:
-    """Construct WhisperModel; CUDA failures do **not** fall back to CPU."""
+    """Construct WhisperModel; CUDA unavailable → CPU + warning (not silent)."""
     from faster_whisper import WhisperModel
 
+    requested = device
     logger.info(
         "Loading Whisper model=%s device=%s compute_type=%s",
         model_name,
@@ -51,16 +83,57 @@ def build_whisper_model(model_name: str, device: str, compute_type: str) -> Any:
         compute_type,
     )
     try:
-        return WhisperModel(model_name, device=device, compute_type=compute_type)
+        model = WhisperModel(model_name, device=device, compute_type=compute_type)
     except Exception as exc:
-        if device == "cuda":
+        if device != "cuda":
+            raise
+        cpu_compute = resolve_whisper_compute_type("cpu")
+        logger.warning(
+            "%s=cuda requested but CUDA is unavailable or WhisperModel failed "
+            "to initialize (%s); falling back to CPU (compute_type=%s). "
+            "Fix the NVIDIA/CUDA stack (nvidia-smi, Docker --gpus) to use GPU.",
+            ENV_WHISPER_DEVICE,
+            exc,
+            cpu_compute,
+        )
+        logger.info(
+            "Loading Whisper model=%s device=cpu compute_type=%s (after CUDA fallback)",
+            model_name,
+            cpu_compute,
+        )
+        try:
+            model = WhisperModel(model_name, device="cpu", compute_type=cpu_compute)
+        except Exception as cpu_exc:
             raise WhisperDeviceError(
-                f"{ENV_WHISPER_DEVICE}=cuda but CUDA is unavailable or WhisperModel "
-                f"failed to initialize ({exc}). Fix the NVIDIA/CUDA stack "
-                f"(nvidia-smi, Docker --gpus), or set {ENV_WHISPER_DEVICE}=cpu. "
-                "Media Hub does not silently fall back to CPU when cuda is requested."
-            ) from exc
-        raise
+                f"{ENV_WHISPER_DEVICE}=cuda failed ({exc}) and CPU fallback also "
+                f"failed ({cpu_exc})."
+            ) from cpu_exc
+        _record_whisper_runtime(
+            requested=requested,
+            effective="cpu",
+            compute_type=cpu_compute,
+            cuda_fallback=True,
+        )
+        logger.warning(
+            "Whisper using device=cpu compute_type=%s (requested=%s; CUDA fallback)",
+            cpu_compute,
+            requested,
+        )
+        return model
+
+    _record_whisper_runtime(
+        requested=requested,
+        effective=device,
+        compute_type=compute_type,
+        cuda_fallback=False,
+    )
+    logger.info(
+        "Whisper using device=%s compute_type=%s (requested=%s)",
+        device,
+        compute_type,
+        requested,
+    )
+    return model
 
 
 def transcribe_audio(

@@ -6,7 +6,7 @@ Dual mode (ADR-034):
     # CPU (default) — config only
     python scripts/smoke_whisper_device.py
 
-    # CUDA — loads WhisperModel; fails clearly if CUDA unavailable (no CPU fallback)
+    # CUDA — loads WhisperModel; falls back to CPU with warning if CUDA unavailable
     MEDIA_HUB_WHISPER_DEVICE=cuda python scripts/smoke_whisper_device.py --load-model
 """
 
@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 from backend.transcription import (  # noqa: E402
     WhisperDeviceError,
     build_whisper_model,
+    get_whisper_device_status,
     resolve_whisper_compute_type,
     resolve_whisper_device,
 )
@@ -58,7 +59,13 @@ def main() -> int:
     except WhisperDeviceError as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1
-    print(f"WhisperModel loaded model={args.model!r} device={device}")
+    status = get_whisper_device_status()
+    print(
+        f"WhisperModel loaded model={args.model!r} "
+        f"device_effective={status['device_effective']!r} "
+        f"compute_type={status['compute_type']!r} "
+        f"cuda_fallback={status['cuda_fallback']}"
+    )
     del model
     print("OK")
     return 0
