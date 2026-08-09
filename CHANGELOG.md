@@ -13,6 +13,8 @@ Checklist de fechamento de versão: [ADR-021](docs/DECISIONS.md#adr-021--checkli
 
 ### Added
 
+- P1-03: opt-in `Dockerfile.cuda` + `docker-compose.cuda.yml` (NVIDIA CUDA 12
+  + cuDNN runtime). Default `Dockerfile` / GHCR publish stays CPU-only.
 - ADR-034 / P1-02: dual-mode Whisper — CPU default (ADR-006) and opt-in
   `MEDIA_HUB_WHISPER_DEVICE=cuda` (+ optional `MEDIA_HUB_WHISPER_COMPUTE_TYPE`).
   If CUDA is requested but unavailable → **CPU fallback with warning** (not a

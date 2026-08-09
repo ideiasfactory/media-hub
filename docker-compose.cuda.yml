@@ -1,0 +1,32 @@
+# CUDA opt-in override for DEV / GPU workers (P1-03 / ADR-034).
+# Does NOT replace the default CPU Compose (`docker-compose.yml`).
+#
+# Usage (NVIDIA host with `docker --gpus all`):
+#   cp .env.example .env   # set MEDIA_HUB_WHISPER_DEVICE=cuda + API key
+#   mkdir -p logs output && touch registry.jsonl
+#   docker compose -f docker-compose.yml -f docker-compose.cuda.yml up --build -d
+#
+# Image stays local (`media-hub:cuda`) unless you retag/push separately.
+# GHCR default publish remains the CPU Dockerfile.
+
+name: media-hub-cuda
+
+services:
+  media-hub:
+    build:
+      context: .
+      dockerfile: Dockerfile.cuda
+    image: ${MEDIA_HUB_IMAGE:-media-hub:cuda}
+    environment:
+      MEDIA_HUB_API_KEY: ${MEDIA_HUB_API_KEY:-}
+      MEDIA_HUB_WHISPER_DEVICE: ${MEDIA_HUB_WHISPER_DEVICE:-cuda}
+      MEDIA_HUB_WHISPER_COMPUTE_TYPE: ${MEDIA_HUB_WHISPER_COMPUTE_TYPE:-}
+    gpus: all
+    # Compose v2 also accepts deploy.resources; `gpus:` is enough for Desktop/WSL2.
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

@@ -1093,8 +1093,9 @@ O produto deve suportar **dois modos de primeira classe**:
 Operadores precisam escolher de forma óbvia via config/env, sem fork do core e
 sem quebrar o caminho CPU.
 
-Imagem Docker GPU / profile NVIDIA fica para fatia seguinte (P1-03); esta ADR
-cobre a seleção de device no runtime + política de fallback com aviso.
+Imagem Docker GPU / profile NVIDIA = **P1-03** (`Dockerfile.cuda` +
+`docker-compose.cuda.yml`); esta ADR cobre a seleção de device no runtime +
+política de fallback com aviso. GHCR default continua a imagem CPU.
 
 ### Decisão
 
@@ -1127,7 +1128,7 @@ cobre a seleção de device no runtime + política de fallback com aviso.
 - CPU path e CI sem GPU permanecem verdes.
 - Docs (README / `.env.example`) deixam a escolha CPU vs CUDA óbvia.
 - Ops liga CUDA só com stack NVIDIA + ctranslate2 compatível.
-- Dockerfile/profile GPU (P1-03) consome o mesmo contrato de env.
+- Dockerfile/profile GPU (P1-03: `Dockerfile.cuda`) consome o mesmo contrato de env.
 - Sem interface `Transcriber` formal ainda (ADR-008 / ADR-014).
 
 ---
