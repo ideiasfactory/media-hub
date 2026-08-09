@@ -19,7 +19,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-003](#adr-003--downloads-por-nomes-fixos) | Downloads por nomes fixos | Accepted |
 | [ADR-004](#adr-004--um-vídeo-por-job) | Um vídeo por job | Accepted |
 | [ADR-005](#adr-005--porta-fixa-8010-e-único-processo-uvicorn) | Porta fixa 8010 e único processo Uvicorn | Accepted |
-| [ADR-006](#adr-006--faster-whisper-local-em-cpu) | Faster-Whisper local em CPU | Accepted |
+| [ADR-006](#adr-006--faster-whisper-local-em-cpu) | Faster-Whisper local em CPU | Accepted (amended by ADR-034) |
 | [ADR-007](#adr-007--arquitetura-baseada-em-adapters) | Arquitetura baseada em Adapters | Accepted (diretriz) |
 | [ADR-008](#adr-008--interface-transcriber-desacoplada) | Interface Transcriber desacoplada | Accepted (diretriz) |
 | [ADR-009](#adr-009--content-intelligence-desacoplada-da-aquisição) | Content Intelligence desacoplada da aquisição | Accepted (diretriz) |
@@ -47,6 +47,7 @@ Documentação relacionada: [ARCHITECTURE.md](ARCHITECTURE.md) ·
 | [ADR-031](#adr-031--homologação-ihl-runner-self-hosted) | Homologação IHL (runner self-hosted) | Accepted (amended by ADR-033) |
 | [ADR-032](#adr-032--dev-compose-prod-adiado-gitops-ready) | DEV Compose; PROD adiado; GitOps-ready | Accepted (amended by ADR-033) |
 | [ADR-033](#adr-033--artefato-público-promote-privado-media-hub-ops) | Artefato público / promote privado (`media-hub-ops`) | Accepted |
+| [ADR-034](#adr-034--faster-whisper-device-opcional-via-env-cuda) | Faster-Whisper device opcional via env (CUDA) | Accepted |
 
 Documentação operacional (comunidade): [CICD.md](CICD.md).  
 Open core / multi-repo: [OPEN_CORE_AND_OPS.md](OPEN_CORE_AND_OPS.md) ·
@@ -179,7 +180,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8010 --reload
 
 ## ADR-006 — Faster-Whisper local em CPU
 
-**Status:** Accepted  
+**Status:** Accepted (amended by [ADR-034](#adr-034--faster-whisper-device-opcional-via-env-cuda))  
 **Data:** 2026-08-06  
 **Épico:** EPIC-001  
 **Revisão prevista:** EPIC-014
@@ -190,8 +191,12 @@ A v0.1 exige STT local, sem depender de APIs pagas na primeira entrega.
 
 ### Decisão
 
-Usar `faster-whisper` em CPU com `compute_type=int8`. Modelos permitidos: `tiny`,
-`base`, `small`. Idiomas: autodetect, `pt`, `en`, `es`.
+Usar `faster-whisper` em CPU com `compute_type=int8` como **default**. Modelos
+permitidos: `tiny`, `base`, `small`. Idiomas: autodetect, `pt`, `en`, `es`.
+
+Seleção opcional de `device=cuda` (e `compute_type` associado) via variáveis de
+ambiente: ver ADR-034. O caminho CPU permanece o default e o caminho suportado
+sem GPU.
 
 ### Consequências
 
@@ -199,6 +204,7 @@ Usar `faster-whisper` em CPU com `compute_type=int8`. Modelos permitidos: `tiny`
 - Qualidade/velocidade limitadas pelo hardware local.
 - Modelos são baixados na primeira utilização.
 - Outros engines entram via interface Transcriber (ADR-008 / EPIC-014).
+- GPU opcional não quebra installs só-CPU (ADR-034).
 
 ---
 
@@ -1064,6 +1070,62 @@ Apache-2.0.
 - Contribuições OSS não precisam de labels/runner IHL no actionlint do open.
 - Produto multi-repo (core / ops / cloud): classificar épicos A/B/C em
   [EPICS.md](EPICS.md); topologia em [REPO_SEGMENTATION.md](REPO_SEGMENTATION.md).
+
+---
+
+## ADR-034 — Faster-Whisper device opcional via env (CUDA)
+
+**Status:** Accepted  
+**Data:** 2026-08-08  
+**Épico:** EPIC-001 (extensão runtime) / preparação EPIC-014  
+**Amenda:** [ADR-006](#adr-006--faster-whisper-local-em-cpu)  
+**Tipo:** A (core)
+
+### Contexto
+
+O produto deve suportar **dois modos de primeira classe**:
+
+| Modo | Público | Risco |
+|------|---------|-------|
+| **CPU** (default) | Self-hosters sem GPU, CI, laptops | Baixo — ADR-006 |
+| **CUDA** (opt-in) | Operadores NVIDIA / worker híbrido | Exige driver + CUDA |
+
+Operadores precisam escolher de forma óbvia via config/env, sem fork do core e
+sem quebrar o caminho CPU.
+
+Imagem Docker GPU / profile NVIDIA fica para fatia seguinte (P1-03); esta ADR
+cobre a seleção de device no runtime + política de erro.
+
+### Decisão
+
+1. **Dual-mode obrigatório:** CPU e CUDA são modos suportados; o default
+   continua **CPU** (`device=cpu`, `compute_type=int8`) — ADR-006.
+2. **Env (contrato):**
+   - `MEDIA_HUB_WHISPER_DEVICE` — `cpu` (default) ou `cuda`.
+   - `MEDIA_HUB_WHISPER_COMPUTE_TYPE` — opcional; se omitido: `int8` em CPU,
+     `float16` em CUDA.
+3. **Sem fallback silencioso:** se `device=cuda` e a inicialização falhar,
+   o job falha com `WhisperDeviceError` explícito. Operador corrige a stack
+   NVIDIA/`--gpus` **ou** muda deliberadamente para `cpu`. Fallback automático
+   para CPU esconderia misconfig e performance errada.
+4. **Observabilidade:** log `Loading Whisper model=… device=… compute_type=…`
+   no load; verificar também `nvidia-smi` no host antes de optar por CUDA.
+5. **Concorrência STT = 1** por processo/worker quando `device=cuda` (VRAM /
+   estabilidade). O monólito local v0.2.x já é um único Uvicorn; ops de worker
+   GPU deve manter conc=1 até medição autorizar mais.
+6. **Volumes de worker (nota leve):** preferir FS Linux nativo (ex.
+   `$HOME/ihl/{projeto}` no WSL2), não `/mnt/c/...`. Detalhe de compose em
+   ops/cloud.
+7. **Smoke:** `scripts/smoke_whisper_device.py`; `--load-model` exercita
+   `WhisperModel` no host.
+
+### Consequências
+
+- CPU path e CI sem GPU permanecem verdes.
+- Docs (README / `.env.example`) deixam a escolha CPU vs CUDA óbvia.
+- Ops liga CUDA só com stack NVIDIA + ctranslate2 compatível.
+- Dockerfile/profile GPU (P1-03) consome o mesmo contrato de env.
+- Sem interface `Transcriber` formal ainda (ADR-008 / ADR-014).
 
 ---
 

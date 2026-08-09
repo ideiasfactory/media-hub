@@ -21,6 +21,8 @@ services:
         required: false
     environment:
       MEDIA_HUB_API_KEY: ${MEDIA_HUB_API_KEY:-}
+      MEDIA_HUB_WHISPER_DEVICE: ${MEDIA_HUB_WHISPER_DEVICE:-cpu}
+      MEDIA_HUB_WHISPER_COMPUTE_TYPE: ${MEDIA_HUB_WHISPER_COMPUTE_TYPE:-}
     volumes:
       - ./logs:/app/logs
       - ./output:/app/output

@@ -26,7 +26,9 @@ via cookie HttpOnly quando há API Key e delega o processamento ao backend.
 2. Uma tarefa de background do FastAPI atualiza o job mantido em memória.
 3. `yt-dlp` obtém metadados e baixa somente o melhor áudio disponível.
 4. O pós-processador do `yt-dlp` usa FFmpeg para gerar `audio.mp3`.
-5. `faster-whisper`, em CPU com `compute_type="int8"`, gera segmentos e idioma.
+5. `faster-whisper` gera segmentos e idioma. Default: `device=cpu`,
+   `compute_type=int8` (ADR-006). Opcional: `MEDIA_HUB_WHISPER_DEVICE=cuda`
+   (e `MEDIA_HUB_WHISPER_COMPUTE_TYPE`, default `float16` em CUDA) — ADR-034.
 6. A aplicação grava TXT, SRT e JSON em `output/{job_id}`.
 7. A UI exibe o resultado e oferece downloads por whitelist fixa.
 

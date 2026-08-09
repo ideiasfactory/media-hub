@@ -16,3 +16,16 @@ IHL homolog desired state and CD live in the private repo
 | _(none yet)_ | PROD | Deferred |
 
 Do not store real secrets in git. Use `.env.example` locally.
+
+### Whisper: CPU vs CUDA
+
+Dual mode — see `.env.example` and
+[ADR-034](../docs/DECISIONS.md#adr-034--faster-whisper-device-opcional-via-env-cuda).
+
+| Mode | Env | Notes |
+|------|-----|-------|
+| CPU (default) | unset / `MEDIA_HUB_WHISPER_DEVICE=cpu` | Safe; DEV Compose works as-is |
+| CUDA (opt-in) | `MEDIA_HUB_WHISPER_DEVICE=cuda` | Needs `nvidia-smi` + Docker `--gpus`; STT conc=1; **no** silent CPU fallback |
+
+GPU worker bind-mounts (ops/cloud) should use a native Linux filesystem path
+(e.g. `$HOME/ihl/{project}/…` on WSL2), not `/mnt/c/...`.
